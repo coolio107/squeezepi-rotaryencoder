@@ -20,6 +20,22 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 static volatile int stop_signal;
 //static void sigHandler( int sig, siginfo_t *siginfo, void *context );
 
+static struct encoder *encoder
+
+void reactEncoderInterrupt() {
+    printf("Interrupt: encoder value: %d\n", encoder->value);
+}
+
+void buttonPressF() {
+    int bit = digitalRead(6);
+    printf("Interrupt, falling edge: button value: %d\n", bit);
+}
+
+void buttonPressR() {
+    int bit = digitalRead(6);
+    printf("Interrupt, rising edge: button value: %d\n", bit);
+}
+
 int main( int argc, char *argv[] ) {
 
     //------------------------------------------------------------------------
@@ -48,14 +64,22 @@ int main( int argc, char *argv[] ) {
     //fprintf (stderr, "start err\n");
     printf ("start out\n");
     wiringPiSetup() ;
-    struct encoder *encoder = setupencoder(5, 4);
+    //struct encoder *encoder = setupencoder(5, 4);
+    encoder = setupencoder(5, 4);
+    wiringPiISR(5,INT_EDGE_BOTH, updateEncoders);
+    wiringPiISR(4,INT_EDGE_BOTH, updateEncoders);
     
+    // button
+    pinMode(6, INPUT);
+    pullUpDnControl(6, PUD_UP);
+    wiringPiISR(6,INT_EDGE_FALLING, buttonPressF);
+    wiringPiISR(6,INT_EDGE_RISING, buttonPressR);
 
     //------------------------------------------------------------------------
     // Mainloop:
     //------------------------------------------------------------------------
     while( 1 /*!stop_signal*/ ) {
-        printf("encoder value: %d\n", encoder->value);
+        printf("Polling: encoder value: %d\n", encoder->value);
         //------------------------------------------------------------------------
         // Just sleep...
         //------------------------------------------------------------------------
