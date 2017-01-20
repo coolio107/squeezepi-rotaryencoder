@@ -20,7 +20,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 static volatile int stop_signal;
 //static void sigHandler( int sig, siginfo_t *siginfo, void *context );
 
-static struct encoder *encoder
+static struct encoder *encoder = NULL;
 
 void reactEncoderInterrupt() {
     printf("Interrupt: encoder value: %d\n", encoder->value);
