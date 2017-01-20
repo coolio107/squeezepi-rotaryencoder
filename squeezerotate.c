@@ -45,8 +45,8 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     // Setup Rotary Encoder
     //------------------------------------------------------------------------
-    fprintf (stderr, "start err");
-    fprintf (stdout, "start out"); 
+    fprintf (stderr, "start err\n");
+    fprintf (stdout, "start out\n");
     wiringPiSetup() ;
     struct encoder *encoder = setupencoder(4, 5);
     
@@ -55,7 +55,7 @@ int main( int argc, char *argv[] ) {
     // Mainloop:
     //------------------------------------------------------------------------
     while( 1 /*!stop_signal*/ ) {
-        printf("encoder value: %d", encoder->value);
+        fprintf(stderr, "encoder value: %d\n", encoder->value);
         //------------------------------------------------------------------------
         // Just sleep...
         //------------------------------------------------------------------------
