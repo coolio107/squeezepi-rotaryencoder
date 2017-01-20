@@ -9,6 +9,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 //#include <signal.h>
 
 #include <wiringPi.h>
