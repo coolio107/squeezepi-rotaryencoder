@@ -45,6 +45,7 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     // Setup Rotary Encoder
     //------------------------------------------------------------------------
+    printf ("start");
     wiringPiSetup() ;
     struct encoder *encoder = setupencoder(4, 5);
     
