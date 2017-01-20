@@ -72,7 +72,7 @@ int main( int argc, char *argv[] ) {
     // button
     pinMode(6, INPUT);
     pullUpDnControl(6, PUD_UP);
-    //wiringPiISR(6,INT_EDGE_BOTH, buttonPressF);
+    wiringPiISR(6,INT_EDGE_BOTH, buttonPressF);
 
     //------------------------------------------------------------------------
     // Mainloop:
