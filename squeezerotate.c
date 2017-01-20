@@ -66,14 +66,13 @@ int main( int argc, char *argv[] ) {
     wiringPiSetup() ;
     //struct encoder *encoder = setupencoder(5, 4);
     encoder = setupencoder(5, 4);
-    wiringPiISR(5,INT_EDGE_BOTH, reactEncoderInterrupt);
-    wiringPiISR(4,INT_EDGE_BOTH, reactEncoderInterrupt);
+    //wiringPiISR(5,INT_EDGE_BOTH, reactEncoderInterrupt);
+    //wiringPiISR(4,INT_EDGE_BOTH, reactEncoderInterrupt);
     
     // button
     pinMode(6, INPUT);
     pullUpDnControl(6, PUD_UP);
-    wiringPiISR(6,INT_EDGE_FALLING, buttonPressF);
-    wiringPiISR(6,INT_EDGE_RISING, buttonPressR);
+    //wiringPiISR(6,INT_EDGE_BOTH, buttonPressF);
 
     //------------------------------------------------------------------------
     // Mainloop:
