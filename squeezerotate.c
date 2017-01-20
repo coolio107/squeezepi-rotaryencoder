@@ -66,8 +66,8 @@ int main( int argc, char *argv[] ) {
     wiringPiSetup() ;
     //struct encoder *encoder = setupencoder(5, 4);
     encoder = setupencoder(5, 4);
-    wiringPiISR(5,INT_EDGE_BOTH, updateEncoders);
-    wiringPiISR(4,INT_EDGE_BOTH, updateEncoders);
+    wiringPiISR(5,INT_EDGE_BOTH, reactEncoderInterrupt);
+    wiringPiISR(4,INT_EDGE_BOTH, reactEncoderInterrupt);
     
     // button
     pinMode(6, INPUT);
