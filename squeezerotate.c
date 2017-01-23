@@ -10,7 +10,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-//#include <signal.h>
+#include <signal.h>
 
 #include <wiringPi.h>
 
@@ -18,7 +18,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include "rotaryencoder/rotaryencoder.h"
 
 static volatile int stop_signal;
-//static void sigHandler( int sig, siginfo_t *siginfo, void *context );
+static void sigHandler( int sig, siginfo_t *siginfo, void *context );
 
 static struct encoder *encoder = NULL;
 
@@ -41,21 +41,21 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     // OK, from here on we catch some terminating signals and ignore others
     //------------------------------------------------------------------------
-    /*struct sigaction act;
+    struct sigaction act;
     memset( &act, 0, sizeof(act) );
     act.sa_sigaction = &sigHandler;
     act.sa_flags     = SA_SIGINFO;
     sigaction( SIGINT, &act, NULL );
-    sigaction( SIGTERM, &act, NULL );*/
+    sigaction( SIGTERM, &act, NULL );
 
     //------------------------------------------------------------------------
     // Setup PID file, ignore errors...
     //------------------------------------------------------------------------
-    /*fp = fopen( pid_fname, "w" );
+    fp = fopen( pid_fname, "w" );
     if( fp ) {
         fprintf( fp, "%d\n", getpid() );
         fclose( fp );
-    }*/
+    }
     
 
     //------------------------------------------------------------------------
@@ -77,7 +77,7 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     // Mainloop:
     //------------------------------------------------------------------------
-    while( 1 /*!stop_signal*/ ) {
+    while( !stop_signal ) {
         printf("Polling: encoder value: %d\n", encoder->value);
         //------------------------------------------------------------------------
         // Just sleep...
@@ -90,7 +90,7 @@ int main( int argc, char *argv[] ) {
 //=========================================================================
 // Handle signals
 //=========================================================================
-/*static void sigHandler( int sig, siginfo_t *siginfo, void *context )
+static void sigHandler( int sig, siginfo_t *siginfo, void *context )
 {
     
     //------------------------------------------------------------------------
@@ -116,4 +116,4 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     // That's it.
     //------------------------------------------------------------------------
-} */
+}
