@@ -86,7 +86,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <wiringPi.h>
 
 #include "squeezerotate.h"
-#include "rotaryencoder/rotaryencoder.h"
+//#include "rotaryencoder/rotaryencoder.h"
 
 static volatile int stop_signal;
 static void sigHandler( int sig, siginfo_t *siginfo, void *context );
