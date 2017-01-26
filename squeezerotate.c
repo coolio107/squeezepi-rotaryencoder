@@ -114,6 +114,7 @@ static volatile int stop_signal;
 static void sigHandler( int sig, siginfo_t *siginfo, void *context );
 
 static struct encoder *encoder = NULL;
+static struct button *button = NULL;
 
 // buttons
 
@@ -271,7 +272,7 @@ int main( int argc, char *argv[] ) {
     wiringPiSetup() ;
     //struct encoder *encoder = setupencoder(5, 4);
     encoder = setupencoder(5, 4, reactEncoderInterrupt, INT_EDGE_BOTH);
-    encoder = setupbutton(6, buttonPress, INT_EDGE_BOTH);
+    button = setupbutton(6, buttonPress, INT_EDGE_BOTH);
     
     // button
     //pinMode(6, INPUT);
