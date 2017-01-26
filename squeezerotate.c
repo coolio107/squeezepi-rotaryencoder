@@ -124,8 +124,8 @@ void updateButtons()
         
         button->value = bit;
         
-        if (encoder->callback)
-            callback(encoder, increment);
+        if (button->callback)
+            button->callback(button, increment);
     }
 }
 
@@ -179,7 +179,7 @@ void updateEncoders()
         
         encoder->lastEncoded = encoded;
         if (encoder->callback)
-            callback(encoder, increment);
+            encoder->callback(encoder, increment);
     }
 }
 
