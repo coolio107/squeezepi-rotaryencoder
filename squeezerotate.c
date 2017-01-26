@@ -233,7 +233,15 @@ void buttonPress(const struct button * button, int change) {
     printf("Interrupt, button value: %d change: %d\n", button->value, change);
 }
 
+
+
+
 int main( int argc, char *argv[] ) {
+    
+    
+    FILE            *fp;
+    const char      *pid_fname      = "/var/run/squeezerotate.pid";
+
 
     //------------------------------------------------------------------------
     // OK, from here on we catch some terminating signals and ignore others
