@@ -1,3 +1,28 @@
+/*
+
+SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
+
+<C> 2017 Jörg Schwieder
+
+*/
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <stdbool.h>
+
+#include <wiringPi.h>
+
+#include "squeezerotate.h"
+//#include "rotaryencoder/rotaryencoder.h"
+
+
+
+
+
+
 // Headers
 
 
@@ -69,24 +94,12 @@ struct encoder *setupencoder(int pin_a, int pin_b);
 
 
 
-/*
-
-SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
-
-<C> 2017 Jörg Schwieder
-
-*/
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
 
-#include <wiringPi.h>
 
-#include "squeezerotate.h"
-//#include "rotaryencoder/rotaryencoder.h"
+
+
 
 static volatile int stop_signal;
 static void sigHandler( int sig, siginfo_t *siginfo, void *context );
