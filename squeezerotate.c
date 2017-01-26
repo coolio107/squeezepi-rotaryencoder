@@ -1,3 +1,74 @@
+// Headers
+
+
+// Buttons and Rotary Encoders
+// Rotary Encoder taken from https://github.com/astine/rotaryencoder
+// http://theatticlight.net/posts/Reading-a-Rotary-Encoder-from-a-Raspberry-Pi/
+
+//17 pins / 2 pins per encoder = 8 maximum encoders
+#define max_encoders 8
+//17 pins / 1 pins per button = 17 maximum buttons
+#define max_buttons 17
+
+struct button;
+
+// A callback executed when a button gets triggered. Button struct and change returned.
+// Note: change might be "0" indicating no change, this happens when buttons chatter
+// Value in struct already updated.
+typedef void (*button_callback_t)(const struct button * button, int change);
+
+struct button {
+    int pin;
+    volatile bool value;
+    button_callback_t callback;
+};
+
+
+//Pre-allocate encoder objects on the stack so we don't have to
+//worry about freeing them
+struct button buttons[max_buttons];
+
+struct encoder;
+
+// A callback executed when a rotary encoder changes it's value. Encoder struct and change returned.
+// Value in struct already updated.
+typedef void (*rotaryencoder_callback_t)(const struct encoder * encoder, long change);
+
+struct encoder
+{
+    int pin_a;
+    int pin_b;
+    volatile long value;
+    volatile int lastEncoded;
+    rotaryencoder_callback_t callback;
+};
+
+
+//Pre-allocate encoder objects on the stack so we don't have to
+//worry about freeing them
+struct encoder encoders[max_encoders];
+
+/*
+ Should be run for every rotary encoder you want to control
+ Returns a pointer to the new rotary encoder structer
+ The pointer will be NULL is the function failed for any reason
+ */
+struct encoder *setupencoder(int pin_a, int pin_b);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 
 SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
@@ -22,18 +93,122 @@ static void sigHandler( int sig, siginfo_t *siginfo, void *context );
 
 static struct encoder *encoder = NULL;
 
-void reactEncoderInterrupt() {
-    printf("Interrupt: encoder value: %d\n", encoder->value);
+// buttons
+
+int numberofbuttons = 0;
+
+void updateButtons()
+{
+    struct button *button = buttons;
+    for (; button < buttons + numberofbuttons; button++)
+    {
+        bool bit = digitalRead(button->pin);
+        
+        int increment = 0;
+        // same? no increment
+        if (button->value != bit)
+            increment = (bit) ? 1 : -1; // Increemnt and current state true: positive increment
+        
+        button->value = bit;
+        
+        if (encoder->callback)
+            callback(encoder, increment);
+    }
 }
 
-void buttonPressF() {
-    int bit = digitalRead(6);
-    printf("Interrupt, falling edge: button value: %d\n", bit);
+struct encoder *setupbutton(int pin, button_callback_t callback, int edge)
+{
+    if (numberofbuttons > max_buttons)
+    {
+        printf("Maximum number of buttons exceded: %i\n", max_buttons);
+        return NULL;
+    }
+    
+    if (edge != INT_EDGE_FALLING && edge != INT_EDGE_RISING)
+        edge = INT_EDGE_BOTH;
+    
+    struct button *newbutton = buttons + numberofbuttons++;
+    newbutton->pin = pin;
+    newbutton->value = 0;
+    newbutton->callback = callback;
+    
+    pinMode(pin, INPUT);
+    pullUpDnControl(pin, PUD_UP);
+    wiringPiISR(pin,edge, updateEncoders);
+    
+    return newbutton;
 }
 
-void buttonPressR() {
-    int bit = digitalRead(6);
-    printf("Interrupt, rising edge: button value: %d\n", bit);
+
+// Buttons and Encoders
+// Rotary Encoder taken from https://github.com/astine/rotaryencoder
+// http://theatticlight.net/posts/Reading-a-Rotary-Encoder-from-a-Raspberry-Pi/
+
+int numberofencoders = 0;
+
+void updateEncoders()
+{
+    struct encoder *encoder = encoders;
+    for (; encoder < encoders + numberofencoders; encoder++)
+    {
+        int MSB = digitalRead(encoder->pin_a);
+        int LSB = digitalRead(encoder->pin_b);
+        
+        int encoded = (MSB << 1) | LSB;
+        int sum = (encoder->lastEncoded << 2) | encoded;
+        
+        int increment = 0;
+        
+        if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) increment = 1;
+        if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) increment = -1;
+        
+        encoder->value += increment;
+        
+        encoder->lastEncoded = encoded;
+        if (encoder->callback)
+            callback(encoder, increment);
+    }
+}
+
+struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t callback, int edge)
+{
+    if (numberofencoders > max_encoders)
+    {
+        printf("Maximum number of encodered exceded: %i\n", max_encoders);
+        return NULL;
+    }
+
+    if (edge != INT_EDGE_FALLING && edge != INT_EDGE_RISING)
+        edge = INT_EDGE_BOTH;
+
+    struct encoder *newencoder = encoders + numberofencoders++;
+    newencoder->pin_a = pin_a;
+    newencoder->pin_b = pin_b;
+    newencoder->value = 0;
+    newencoder->lastEncoded = 0;
+    newencoder->callback = callback;
+    
+    pinMode(pin_a, INPUT);
+    pinMode(pin_b, INPUT);
+    pullUpDnControl(pin_a, PUD_UP);
+    pullUpDnControl(pin_b, PUD_UP);
+    wiringPiISR(pin_a,edge, updateEncoders);
+    wiringPiISR(pin_b,edge, updateEncoders);
+    
+    return newencoder;
+}
+
+
+
+
+
+
+void reactEncoderInterrupt(const struct encoder * encoder, long change) {
+    printf("Interrupt: encoder value: %d change: %d\n", encoder->value, change);
+}
+
+void buttonPress(const struct button * button, int change) {
+    printf("Interrupt, button value: %d change: %d\n", button->value, change);
 }
 
 int main( int argc, char *argv[] ) {
@@ -65,14 +240,13 @@ int main( int argc, char *argv[] ) {
     printf ("start out\n");
     wiringPiSetup() ;
     //struct encoder *encoder = setupencoder(5, 4);
-    encoder = setupencoder(5, 4);
-    //wiringPiISR(5,INT_EDGE_BOTH, reactEncoderInterrupt);
-    //wiringPiISR(4,INT_EDGE_BOTH, reactEncoderInterrupt);
+    encoder = setupencoder(5, 4, reactEncoderInterrupt, INT_EDGE_BOTH);
+    encoder = setupbutton(6, buttonPress, INT_EDGE_BOTH);
     
     // button
-    pinMode(6, INPUT);
-    pullUpDnControl(6, PUD_UP);
-    wiringPiISR(6,INT_EDGE_BOTH, buttonPressF);
+    //pinMode(6, INPUT);
+    //pullUpDnControl(6, PUD_UP);
+    //wiringPiISR(6,INT_EDGE_BOTH, buttonPressF);
 
     //------------------------------------------------------------------------
     // Mainloop:
