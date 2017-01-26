@@ -13,6 +13,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <string.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include <wiringPi.h>
 
@@ -226,15 +227,30 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
 
 
 
+static unsigned long lasttime = 0;
+static long lastVolume = 0;
+void handleVolume() {
+    struct timespec thistime;
+    clock_gettime(0, &thistime);
+    unsigned long time = thistime.tv_sec * 10 + thistime.tv_nsec / (1e8);
+    if (lasttime - time < 2) {
+        return;
+    }
+    if (lastVolume != encoder->value) {
+        printf("Time: %ul Volume Change: %d\n", time, encoder->value - lastVolume);
+        lastVolume = encoder->value;
+        lasttime = time;
+    }
+}
+
 void reactEncoderInterrupt(const struct encoder * encoder, long change) {
     printf("Interrupt: encoder value: %d change: %d\n", encoder->value, change);
+    handleVolume();
 }
 
 void buttonPress(const struct button * button, int change) {
     printf("Interrupt, button value: %d change: %d\n", button->value, change);
 }
-
-
 
 
 int main( int argc, char *argv[] ) {
@@ -284,6 +300,7 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     while( !stop_signal ) {
         printf("Polling: encoder value: %d\n", encoder->value);
+        handleVolume();
         //------------------------------------------------------------------------
         // Just sleep...
         //------------------------------------------------------------------------
