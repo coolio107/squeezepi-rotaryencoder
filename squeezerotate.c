@@ -271,8 +271,8 @@ int main( int argc, char *argv[] ) {
     printf ("start out\n");
     wiringPiSetup() ;
     //struct encoder *encoder = setupencoder(5, 4);
-    encoder = setupencoder(5, 4, reactEncoderInterrupt, INT_EDGE_FALLING);
-    button = setupbutton(6, buttonPress, INT_EDGE_FALLING);
+    encoder = setupencoder(5, 4, reactEncoderInterrupt, INT_EDGE_RISING);
+    button = setupbutton(6, buttonPress, INT_EDGE_RISING);
     
     // button
     //pinMode(6, INPUT);
