@@ -10,6 +10,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <signal.h>
 #include <stdbool.h>
 
@@ -53,6 +54,14 @@ struct button {
 //worry about freeing them
 struct button buttons[max_buttons];
 
+/*
+ Should be run for every rotary encoder you want to control
+ Returns a pointer to the new rotary encoder structer
+ The pointer will be NULL is the function failed for any reason
+ */
+struct button *setupbutton(int pin, button_callback_t callback, int edge);
+
+
 struct encoder;
 
 // A callback executed when a rotary encoder changes it's value. Encoder struct and change returned.
@@ -78,7 +87,7 @@ struct encoder encoders[max_encoders];
  Returns a pointer to the new rotary encoder structer
  The pointer will be NULL is the function failed for any reason
  */
-struct encoder *setupencoder(int pin_a, int pin_b);
+struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t callback, int edge);
 
 
 
@@ -129,7 +138,7 @@ void updateButtons()
     }
 }
 
-struct encoder *setupbutton(int pin, button_callback_t callback, int edge)
+struct button *setupbutton(int pin, button_callback_t callback, int edge)
 {
     if (numberofbuttons > max_buttons)
     {
@@ -147,7 +156,7 @@ struct encoder *setupbutton(int pin, button_callback_t callback, int edge)
     
     pinMode(pin, INPUT);
     pullUpDnControl(pin, PUD_UP);
-    wiringPiISR(pin,edge, updateEncoders);
+    wiringPiISR(pin,edge, updateButtons);
     
     return newbutton;
 }
