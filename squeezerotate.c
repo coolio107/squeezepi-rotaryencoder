@@ -246,7 +246,7 @@ bool sendCommand(char * fragment) {
         pthread_mutex_unlock(&lock);
         return false;
     }
-    commLock = yes;
+    commLock = true;
     pthread_mutex_unlock(&lock);
     
     char address[256];
