@@ -236,7 +236,7 @@ static char * MAC = "7c:dd:90:a3:fd:6a";
 static struct curl_slist * headerList = NULL;
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
-#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
+#define SERVER_ADDRESS_MASK "%s:%d/jsonrpc.js"
 
 bool sendCommand(char * fragment) {
     if (!curl)
