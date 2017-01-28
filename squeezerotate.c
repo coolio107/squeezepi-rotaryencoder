@@ -233,6 +233,7 @@ static pthread_mutex_t lock;
 static char * server = "192.168.0.13";
 static int port = 9000;
 static char * MAC = "7c:dd:90:a3:fd:6a";
+static struct curl_slist * headerList = NULL;
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
 #define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
@@ -253,11 +254,14 @@ bool sendCommand(char * fragment) {
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
     printf("server address: %s\n", address);
     curl_easy_setopt(curl, CURLOPT_URL, server);
+    if (headerList)
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
     char jsonFragment[256];
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
     printf("server command: %s\n", jsonFragment);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonFragment);
     CURLcode res = curl_easy_perform(curl);
+    printf("curl result: %d", res);
     commLock = false;
     return true;
 }
@@ -340,6 +344,10 @@ int main( int argc, char *argv[] ) {
         curl_global_cleanup();
         return -1;
     }
+    headerList = curl_slist_append(headerList, "Content-Type: application/json");
+    // session-ID?
+    //headerList = curl_slist_append(headerList, "x-sdi-squeezenetwork-session: ...")
+    
 
     //------------------------------------------------------------------------
     // Setup Rotary Encoder
@@ -370,6 +378,7 @@ int main( int argc, char *argv[] ) {
     } /* end of: while( !stopflag ) */
     
     // clean up curl;
+    curl_slist_free_all(list);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 }
