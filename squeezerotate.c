@@ -254,14 +254,14 @@ bool sendCommand(char * fragment) {
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
     printf("server address: %s\n", address);
     curl_easy_setopt(curl, CURLOPT_URL, server);
-    if (headerList)
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
     char jsonFragment[256];
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
     printf("server command: %s\n", jsonFragment);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonFragment);
+    if (headerList)
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
     CURLcode res = curl_easy_perform(curl);
-    printf("curl result: %d", res);
+    printf("curl result: %d\n", res);
     commLock = false;
     return true;
 }
