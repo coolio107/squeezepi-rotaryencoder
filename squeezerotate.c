@@ -378,7 +378,7 @@ int main( int argc, char *argv[] ) {
     } /* end of: while( !stopflag ) */
     
     // clean up curl;
-    curl_slist_free_all(list);
+    curl_slist_free_all(headerList);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 }
