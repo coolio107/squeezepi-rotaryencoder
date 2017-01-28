@@ -251,10 +251,11 @@ bool sendCommand(char * fragment) {
     
     char address[256];
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
+    printf("server address: %s", address\n);
     curl_easy_setopt(curl, CURLOPT_URL, server);
     char jsonFragment[256];
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
-    printf("server command: %s", jsonFragment);
+    printf("server command: %s", jsonFragment\n);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonFragment);
     CURLcode res = curl_easy_perform(curl);
     commLock = false;
@@ -281,7 +282,7 @@ void handleVolume() {
         printf("Time: %u Volume Change: %d\n", time, delta);
         char fragment[20];
         char * prefix = (delta > 0) ? "+" : "-";
-        snprintf(fragment, 20, "mixer volume %s%d", prefix, abs(delta));
+        snprintf(fragment, 20, "[\"mixer\",\"volume\",\"%s%d\"]", prefix, abs(delta));
         
         // accumulate non-sent commands. Is this what we want?
         if (sendCommand(fragment)) {
