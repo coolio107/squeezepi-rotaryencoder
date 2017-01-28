@@ -254,8 +254,10 @@ bool sendCommand(char * fragment) {
     curl_easy_setopt(curl, CURLOPT_URL, server);
     char jsonFragment[256];
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
+    printf("server command: %s", jsonFragment);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonFragment);
     CURLcode res = curl_easy_perform(curl);
+    commLock = false;
     return true;
 }
 
