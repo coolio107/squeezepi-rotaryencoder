@@ -236,7 +236,8 @@ static char * MAC = "7c:dd:90:a3:fd:6a";
 static struct curl_slist * headerList = NULL;
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
-#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
+//#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
+#define SERVER_ADDRESS_MASK "http://%s/jsonrpc.js"
 
 bool sendCommand(char * fragment) {
     if (!curl)
@@ -251,7 +252,8 @@ bool sendCommand(char * fragment) {
     pthread_mutex_unlock(&lock);
     
     char address[256];
-    snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
+    //snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
+    snprintf(address, 256, SERVER_ADDRESS_MASK, server);
     printf("server address: %s\n", address);
     curl_easy_setopt(curl, CURLOPT_URL, server);
     curl_easy_setopt(curl, CURLOPT_PORT, port);
