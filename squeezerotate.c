@@ -231,7 +231,7 @@ static volatile bool commLock;
 static pthread_mutex_t lock;
 
 static char * server = "192.168.0.13";
-static int port = 9000;
+static long port = 9000;
 static char * MAC = "7c:dd:90:a3:fd:6a";
 static struct curl_slist * headerList = NULL;
 
@@ -254,6 +254,7 @@ bool sendCommand(char * fragment) {
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
     printf("server address: %s\n", address);
     curl_easy_setopt(curl, CURLOPT_URL, server);
+    curl_easy_setopt(curl, CURLOPT_PORT, port);
     char jsonFragment[256];
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
     printf("server command: %s\n", jsonFragment);
