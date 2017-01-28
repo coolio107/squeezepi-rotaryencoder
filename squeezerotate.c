@@ -280,9 +280,9 @@ void handleVolume() {
     if (lastVolume != encoder->value) {
         long delta = encoder->value - lastVolume;
         printf("Time: %u Volume Change: %d\n", time, delta);
-        char fragment[20];
+        char fragment[50];
         char * prefix = (delta > 0) ? "+" : "-";
-        snprintf(fragment, 20, "[\"mixer\",\"volume\",\"%s%d\"]", prefix, abs(delta));
+        snprintf(fragment, 50, "[\"mixer\",\"volume\",\"%s%d\"]", prefix, abs(delta));
         
         // accumulate non-sent commands. Is this what we want?
         if (sendCommand(fragment)) {
