@@ -239,12 +239,12 @@ static char * MAC = "7c:dd:90:a3:fd:6a";
 
 bool sendCommand(char * fragment) {
     if (!curl)
-        return no;
+        return false;
     
     pthread_mutex_lock(&lock);
     if (commLock) {
         pthread_mutex_unlock(&lock);
-        return no;
+        return false;
     }
     commLock = yes;
     pthread_mutex_unlock(&lock);
@@ -256,6 +256,7 @@ bool sendCommand(char * fragment) {
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonFragment);
     CURLcode res = curl_easy_perform(curl);
+    return true;
 }
 
 
