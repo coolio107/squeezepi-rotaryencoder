@@ -14,6 +14,8 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <signal.h>
 #include <stdbool.h>
 #include <time.h>
+#include<pthread.h>
+#include <curl/curl.h>
 
 #include <wiringPi.h>
 
@@ -224,6 +226,41 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
 
 
 
+static CURL *curl;
+static volatile bool commLock;
+static pthread_mutex_t lock;
+
+static char * server = "192.168.0.13";
+static int port 9000;
+static char * MAC = "7c:dd:90:a3:fd:6a";
+
+#define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
+#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
+
+bool sendCommand:(char * fragment) {
+    if (!curl)
+        return no;
+    
+    pthread_mutex_lock(&lock);
+    if (commLock) {
+        pthread_mutex_unlock(&lock);
+        return no;
+    }
+    commLock = yes;
+    pthread_mutex_unlock(&lock);
+    
+    char address[256];
+    snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
+    curl_easy_setopt(curl, CURLOPT_URL, server);
+    char jsonFragment[256];
+    snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonFragment);
+    CURLcode res = curl_easy_perform(curl);
+}
+
+
+
+
 
 
 
@@ -237,9 +274,17 @@ void handleVolume() {
         return;
     }
     if (lastVolume != encoder->value) {
-        printf("Time: %ul Volume Change: %d\n", time, encoder->value - lastVolume);
-        lastVolume = encoder->value;
-        lasttime = time;
+        long delta = encoder->value - lastVolume;
+        printf("Time: %u Volume Change: %d\n", time, delta);
+        char fragment[20];
+        char * prefix = (delta > 0) ? "+" : "-";
+        snprintf(fragment, 20, "mixer volume %s%d", prefix, abs(delta));
+        
+        // accumulate non-sent commands. Is this what we want?
+        if (sendCommand(fragment)) {
+            lastVolume = encoder->value;
+            lasttime = time;
+        }
     }
 }
 
@@ -254,8 +299,6 @@ void buttonPress(const struct button * button, int change) {
 
 
 int main( int argc, char *argv[] ) {
-    
-    
     FILE            *fp;
     const char      *pid_fname      = "/var/run/squeezerotate.pid";
 
@@ -279,6 +322,20 @@ int main( int argc, char *argv[] ) {
         fclose( fp );
     }
     
+    
+    // setup comm
+    if (pthread_mutex_init(&lock, NULL) != 0)
+    {
+        printf("comm lock mutex init failed\n");
+        return -1;
+    }
+    curl_global_init(CURL_GLOBAL_ALL);
+    // get a curl handle
+    curl = curl_easy_init();
+    if (!curl) {
+        curl_global_cleanup();
+        return -1;
+    }
 
     //------------------------------------------------------------------------
     // Setup Rotary Encoder
@@ -307,6 +364,10 @@ int main( int argc, char *argv[] ) {
         usleep( 200000 ); // 0.2s
         
     } /* end of: while( !stopflag ) */
+    
+    // clean up curl;
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
 }
 
 //=========================================================================
