@@ -231,13 +231,13 @@ static volatile bool commLock;
 static pthread_mutex_t lock;
 
 static char * server = "192.168.0.13";
-static int port 9000;
+static int port = 9000;
 static char * MAC = "7c:dd:90:a3:fd:6a";
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
 #define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
 
-bool sendCommand:(char * fragment) {
+bool sendCommand(char * fragment) {
     if (!curl)
         return no;
     
