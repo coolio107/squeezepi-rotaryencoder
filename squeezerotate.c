@@ -311,7 +311,7 @@ void handleVolume() {
 
 void reactEncoderInterrupt(const struct encoder * encoder, long change) {
     printf("Interrupt: encoder value: %d change: %d\n", encoder->value, change);
-    handleVolume();
+    //handleVolume();
 }
 
 void buttonPress(const struct button * button, int change) {
@@ -388,7 +388,7 @@ int main( int argc, char *argv[] ) {
         //------------------------------------------------------------------------
         // Just sleep...
         //------------------------------------------------------------------------
-        usleep( 200000 ); // 0.2s
+        usleep( 100000 ); // 0.1s
         
     } /* end of: while( !stopflag ) */
     
