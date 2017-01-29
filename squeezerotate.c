@@ -254,8 +254,8 @@ bool sendCommand(char * fragment) {
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
     printf("server address: %s\n", address);
     curl_easy_setopt(curl, CURLOPT_URL, server);
-    curl_easy_setopt(curl, CURLOPT_PORT, port);
-    curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1);
+    //curl_easy_setopt(curl, CURLOPT_PORT, port);
+    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     char jsonFragment[256];
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
     printf("server command: %s\n", jsonFragment);
