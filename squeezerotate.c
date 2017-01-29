@@ -254,7 +254,8 @@ bool sendCommand(char * fragment) {
     char address[256];
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
     printf("server address: %s\n", address);
-    curl_easy_setopt(curl, CURLOPT_URL, server);
+    //curl_easy_setopt(curl, CURLOPT_URL, server);
+    curl_easy_setopt(curl, CURLOPT_URL, "/jsonrpc.js");
     char target[30];
     snprintf(target, 30, "::%s:%d", server, port);
     targetList = curl_slist_append(targetList, target);
