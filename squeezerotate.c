@@ -237,7 +237,7 @@ static struct curl_slist * headerList = NULL;
 static struct curl_slist * targetList = NULL;
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
-//#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
+#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
 #define SERVER_ADDRESS_MASK "http://%s/jsonrpc.js"
 
 bool sendCommand(char * fragment) {
