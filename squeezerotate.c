@@ -282,11 +282,6 @@ bool sendCommand(char * fragment) {
 
 
 
-void handlePlayPause() {
-    sendCommand("[\"pause\"]");
-}
-
-
 static unsigned long lasttimeVol = 0;
 static long lastVolume = 0;
 void handleVolume() {
@@ -318,8 +313,24 @@ void reactEncoderInterrupt(const struct encoder * encoder, long change) {
 }
 
 static unsigned long lasttimePause = 0;
+static bool pauseWaiting = false;
+
+void handlePlayPause() {
+    if (pauseWaiting) {
+        sendCommand("[\"pause\"]");
+        pauseWaiting = false;
+    }
+}
 
 void buttonPress(const struct button * button, int change) {
+    if (button->value) {
+        pauseWaiting = true;
+        //if (sendCommand("[\"pause\"]")) {
+        lasttimePause = time;
+        //}
+    }
+    return;
+    
     struct timespec thistime;
     clock_gettime(0, &thistime);
     unsigned long time = thistime.tv_sec * 10 + thistime.tv_nsec / (1e8);
@@ -330,9 +341,10 @@ void buttonPress(const struct button * button, int change) {
     
     printf("Interrupt, button value: %d change: %d\n", button->value, change);
     if (button->value) {
-        if (sendCommand("[\"pause\"]")) {
+        pauseWaiting = true;
+        //if (sendCommand("[\"pause\"]")) {
             lasttimePause = time;
-        }
+        //}
     }
 }
 
@@ -402,6 +414,7 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     while( !stop_signal ) {
         printf("Polling: encoder value: %d\n", encoder->value);
+        handlePlayPause();
         handleVolume();
         //------------------------------------------------------------------------
         // Just sleep...
