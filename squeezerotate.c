@@ -257,7 +257,7 @@ bool sendCommand(char * fragment) {
     curl_easy_setopt(curl, CURLOPT_URL, server);
     char target[30];
     snprintf(target, 30, "::%s:%d", server, port);
-    targetList = curl_slist_append(targetList, "::%s:%d");
+    targetList = curl_slist_append(targetList, target);
     curl_easy_setopt(curl, CURLOPT_CONNECT_TO, targetList);
 
     //curl_easy_setopt(curl, CURLOPT_PORT, port);
