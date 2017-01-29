@@ -282,7 +282,7 @@ bool sendCommand(char * fragment) {
 
 
 
-void handlePlayPause {
+void handlePlayPause() {
     sendCommand("[\"pause\"]");
 }
 
