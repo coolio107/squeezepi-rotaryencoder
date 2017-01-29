@@ -255,13 +255,13 @@ bool sendCommand(char * fragment) {
     char address[256];
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
     printf("server address: %s\n", address);
-    curl_easy_setopt(curl, CURLOPT_URL, server);
-    //curl_easy_setopt(curl, CURLOPT_URL, "/jsonrpc.js");
+    //curl_easy_setopt(curl, CURLOPT_URL, server);
+    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/jsonrpc.js");
     char target[30];
     snprintf(target, 30, "::%s:%d", server, port);
     targetList = curl_slist_append(targetList, target);
     curl_easy_setopt(curl, CURLOPT_CONNECT_TO, targetList);
-    curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1);
+    //curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1);
 
     //curl_easy_setopt(curl, CURLOPT_PORT, port);
     char jsonFragment[256];
