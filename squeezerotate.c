@@ -287,15 +287,16 @@ void handlePlayPause() {
 }
 
 
-static unsigned long lasttime = 0;
+static unsigned long lasttimeVol = 0;
 static long lastVolume = 0;
 void handleVolume() {
     struct timespec thistime;
     clock_gettime(0, &thistime);
     unsigned long time = thistime.tv_sec * 10 + thistime.tv_nsec / (1e8);
-    if (lasttime - time < 2) {
+    // chatter filter 200ms - disabled... called every 100ms anyway plus waits fro network action to complete
+    /*if (lasttimeVol - time < 2) {
         return;
-    }
+    }*/
     if (lastVolume != encoder->value) {
         long delta = encoder->value - lastVolume;
         printf("Time: %u Volume Change: %d\n", time, delta);
@@ -306,7 +307,7 @@ void handleVolume() {
         // accumulate non-sent commands. Is this what we want?
         if (sendCommand(fragment)) {
             lastVolume = encoder->value;
-            lasttime = time;
+            lasttimeVol = time;
         }
     }
 }
@@ -316,10 +317,23 @@ void reactEncoderInterrupt(const struct encoder * encoder, long change) {
     //handleVolume();
 }
 
+static unsigned long lasttimePause = 0;
+
 void buttonPress(const struct button * button, int change) {
+    struct timespec thistime;
+    clock_gettime(0, &thistime);
+    unsigned long time = thistime.tv_sec * 10 + thistime.tv_nsec / (1e8);
+    //chatter filter 500ms
+    if (lasttimePause - time < 5) {
+        return;
+    }
+    
     printf("Interrupt, button value: %d change: %d\n", button->value, change);
-    if (button->value)
-        sendCommand("[\"pause\"]");
+    if (button->value) {
+        if (sendCommand("[\"pause\"]")) {
+            lasttimePause = time;
+        }
+    }
 }
 
 
