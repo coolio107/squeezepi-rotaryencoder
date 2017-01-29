@@ -358,7 +358,7 @@ int main( int argc, char *argv[] ) {
         return -1;
     }
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-    curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, CURL_HTTP_VERSION_1_0);
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
     headerList = curl_slist_append(headerList, "Content-Type: application/json");
     // session-ID?
     //headerList = curl_slist_append(headerList, "x-sdi-squeezenetwork-session: ...")
