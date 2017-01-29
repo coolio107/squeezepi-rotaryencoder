@@ -282,7 +282,9 @@ bool sendCommand(char * fragment) {
 
 
 
-
+void handlePlayPause {
+    sendCommand("[\"pause\"]");
+}
 
 
 static unsigned long lasttime = 0;
@@ -316,6 +318,7 @@ void reactEncoderInterrupt(const struct encoder * encoder, long change) {
 
 void buttonPress(const struct button * button, int change) {
     printf("Interrupt, button value: %d change: %d\n", button->value, change);
+    sendCommand("[\"pause\"]");
 }
 
 
