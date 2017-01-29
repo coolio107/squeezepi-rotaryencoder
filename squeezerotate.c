@@ -234,6 +234,7 @@ static char * server = "192.168.0.13";
 static long port = 9000;
 static char * MAC = "7c:dd:90:a3:fd:6a";
 static struct curl_slist * headerList = NULL;
+static struct curl_slist * targetList = NULL;
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
 #define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
@@ -254,8 +255,12 @@ bool sendCommand(char * fragment) {
     snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
     printf("server address: %s\n", address);
     curl_easy_setopt(curl, CURLOPT_URL, server);
+    char target[30];
+    snprintf(target, 30, "::%s:%d", server, port);
+    targetList = curl_slist_append(targetList, "::%s:%d");
+    curl_easy_setopt(curl, CURLOPT_CONNECT_TO, targetList);
+
     //curl_easy_setopt(curl, CURLOPT_PORT, port);
-    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     char jsonFragment[256];
     snprintf(jsonFragment, 256, JSON_CALL_MASK, 1, MAC, fragment);
     printf("server command: %s\n", jsonFragment);
@@ -264,6 +269,9 @@ bool sendCommand(char * fragment) {
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
     CURLcode res = curl_easy_perform(curl);
     printf("curl result: %d\n", res);
+    curl_slist_free_all(targetList);
+    targetList = NULL;
+
     commLock = false;
     return true;
 }
