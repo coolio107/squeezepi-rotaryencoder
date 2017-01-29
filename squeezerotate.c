@@ -237,7 +237,7 @@ static struct curl_slist * headerList = NULL;
 static struct curl_slist * targetList = NULL;
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
-#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
+//#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
 //#define SERVER_ADDRESS_MASK "http://%s/jsonrpc.js"
 
 bool sendCommand(char * fragment) {
@@ -252,13 +252,13 @@ bool sendCommand(char * fragment) {
     commLock = true;
     pthread_mutex_unlock(&lock);
     
-    char address[256];
-    snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
-    printf("server address: %s\n", address);
+    //char address[256];
+    //snprintf(address, 256, SERVER_ADDRESS_MASK, server, port);
+    //printf("server address: %s\n", address);
     //curl_easy_setopt(curl, CURLOPT_URL, server);
     curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/jsonrpc.js");
-    char target[30];
-    snprintf(target, 30, "::%s:%d", server, port);
+    char target[100];
+    snprintf(target, 100, "::%s:%d", server, port);
     targetList = curl_slist_append(targetList, target);
     curl_easy_setopt(curl, CURLOPT_CONNECT_TO, targetList);
     //curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1);
@@ -357,8 +357,8 @@ int main( int argc, char *argv[] ) {
         curl_global_cleanup();
         return -1;
     }
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+    //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    //curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
     headerList = curl_slist_append(headerList, "Content-Type: application/json");
     // session-ID?
     //headerList = curl_slist_append(headerList, "x-sdi-squeezenetwork-session: ...")
