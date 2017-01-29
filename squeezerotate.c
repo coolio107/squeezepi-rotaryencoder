@@ -318,7 +318,8 @@ void reactEncoderInterrupt(const struct encoder * encoder, long change) {
 
 void buttonPress(const struct button * button, int change) {
     printf("Interrupt, button value: %d change: %d\n", button->value, change);
-    sendCommand("[\"pause\"]");
+    if (button->value)
+        sendCommand("[\"pause\"]");
 }
 
 
