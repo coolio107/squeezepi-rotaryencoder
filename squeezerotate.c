@@ -325,9 +325,6 @@ void handlePlayPause() {
 void buttonPress(const struct button * button, int change) {
     if (button->value) {
         pauseWaiting = true;
-        //if (sendCommand("[\"pause\"]")) {
-        lasttimePause = time;
-        //}
     }
     return;
     
