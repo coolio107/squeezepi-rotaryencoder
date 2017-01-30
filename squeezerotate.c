@@ -230,8 +230,8 @@ static CURL *curl;
 static volatile bool commLock;
 static pthread_mutex_t lock;
 
-static char * server = "192.168.0.13";
-static long port = 9000;
+static char * server = "192.168.0.25";
+static long port = 9200;
 static char * MAC = "7c:dd:90:a3:fd:6a";
 static struct curl_slist * headerList = NULL;
 static struct curl_slist * targetList = NULL;
