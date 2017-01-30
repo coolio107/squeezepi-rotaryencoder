@@ -235,6 +235,8 @@ static long port = 9000;
 static char * MAC = "7c:dd:90:a3:fd:6a";
 static struct curl_slist * headerList = NULL;
 static struct curl_slist * targetList = NULL;
+static char * password = NULL;
+static char * user = NULL;
 
 #define JSON_CALL_MASK	"{\"id\":%ld,\"method\":\"slim.request\",\"params\":[\"%s\",%s]}"
 //#define SERVER_ADDRESS_MASK "http://%s:%d/jsonrpc.js"
@@ -262,6 +264,15 @@ bool sendCommand(char * fragment) {
     targetList = curl_slist_append(targetList, target);
     curl_easy_setopt(curl, CURLOPT_CONNECT_TO, targetList);
     //curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1);
+    
+    user = "Apple.Test";
+    password = "iPeng.Test";
+    
+    char secret[255];
+    if (user && password) {
+        snprintf(secret, 255, "%s:%s", user, password);
+        curl_easy_setopt(easyhandle, CURLOPT_USERPWD, secret);
+    }
 
     //curl_easy_setopt(curl, CURLOPT_PORT, port);
     char jsonFragment[256];
