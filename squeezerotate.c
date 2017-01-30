@@ -271,7 +271,7 @@ bool sendCommand(char * fragment) {
     char secret[255];
     if (user && password) {
         snprintf(secret, 255, "%s:%s", user, password);
-        curl_easy_setopt(easyhandle, CURLOPT_USERPWD, secret);
+        curl_easy_setopt(curl, CURLOPT_USERPWD, secret);
     }
 
     //curl_easy_setopt(curl, CURLOPT_PORT, port);
