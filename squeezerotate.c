@@ -105,7 +105,7 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
 
 // mac address. From SqueezeLite so should match that behaviour.
 // search first 4 interfaces returned by IFCONF
-void get_mac(u8_t mac[]) {
+void get_mac(uint8_t mac[]) {
     char *utmac;
     struct ifconf ifc;
     struct ifreq *ifr, *ifend;
@@ -154,8 +154,8 @@ void get_mac(u8_t mac[]) {
 }
 
 // returns true if server IP was found and changed
-bool get_serverIPv4(u32_t *ip) {
-    u32_t foundIp;
+bool get_serverIPv4(uint32_t *ip) {
+    uint32_t foundIp;
     FILE * procTcp = fopen("/proc/net/tcp");
     if (!procTcp)
         return false;
@@ -186,7 +186,7 @@ bool get_serverIPv4(u32_t *ip) {
         while (*sTemp = toupper(*sTemp))
             sTemp++;
         // port 3483?
-        if ((u32_t *)portComp[0] == (u32_t *)portString[0]) {
+        if ((uint32_t *)portComp[0] == (uint32_t *)portString[0]) {
             fclose(procTcp);
             printf ("found %s ", ipString);
             foundIp = strtoul(ipString, NULL, 16);
@@ -525,8 +525,8 @@ int main( int argc, char *argv[] ) {
     while( !stop_signal ) {
         if (!ipSearchCnt--) {
             ipSearchCnt = IP_SEARCH_TIMEOUT;
-            struct in_addr addr = inet_addr(server);
-            get_serverIPv4(&(addr.s_addr));
+            in_addr_t addr = inet_addr(server);
+            get_serverIPv4(&(&addr));
         }
         printf("Polling: encoder value: %d\n", encoder->value);
         handlePlayPause();
