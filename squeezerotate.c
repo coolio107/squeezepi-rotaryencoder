@@ -17,6 +17,10 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include<pthread.h>
 #include <curl/curl.h>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include <wiringPi.h>
 
 #include "squeezerotate.h"
@@ -97,9 +101,105 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
 
 
 
+// address search
 
+// mac address. From SqueezeLite so should match that behaviour.
+// search first 4 interfaces returned by IFCONF
+void get_mac(u8_t mac[]) {
+    char *utmac;
+    struct ifconf ifc;
+    struct ifreq *ifr, *ifend;
+    struct ifreq ifreq;
+    struct ifreq ifs[4];
+    
+    utmac = getenv("UTMAC");
+    if (utmac)
+    {
+        if ( strlen(utmac) == 17 )
+        {
+            if (sscanf(utmac,"%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+                       &mac[0],&mac[1],&mac[2],&mac[3],&mac[4],&mac[5]) == 6)
+            {
+                return;
+            }
+        }
+        
+    }
+    
+    mac[0] = mac[1] = mac[2] = mac[3] = mac[4] = mac[5] = 0;
+    
+    int s = socket(AF_INET, SOCK_DGRAM, 0);
+    
+    ifc.ifc_len = sizeof(ifs);
+    ifc.ifc_req = ifs;
+    
+    if (ioctl(s, SIOCGIFCONF, &ifc) == 0) {
+        ifend = ifs + (ifc.ifc_len / sizeof(struct ifreq));
+        
+        for (ifr = ifc.ifc_req; ifr < ifend; ifr++) {
+            if (ifr->ifr_addr.sa_family == AF_INET) {
+                
+                strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof(ifreq.ifr_name));
+                if (ioctl (s, SIOCGIFHWADDR, &ifreq) == 0) {
+                    memcpy(mac, ifreq.ifr_hwaddr.sa_data, 6);
+                    if (mac[0]+mac[1]+mac[2] != 0) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    close(s);
+}
 
-
+// returns true if server IP was found and changed
+bool get_serverIPv4(u32_t *ip) {
+    u32_t foundIp;
+    FILE * procTcp = fopen("/proc/net/tcp");
+    if (!procTcp)
+        return false;
+    char line[256];
+    if (!fgets(line, 255, procTcp)) {
+        fclose(procTcp);
+        return false;
+    }
+    while (fgets(line, 255, procTcp)) {
+        printf("line: %s\n", line);
+        strtok(line, " "); // line number
+        strtok(NULL, " "); // source address
+        char * target = strtok(NULL, " "); // target address
+        printf("target: %s\n", target);
+        if (!target) {
+            fclose(procTcp);
+            return false;
+        }
+        char * ipString = strtok(target, ":");
+        char * portString = strtok(NULL, ":");
+        if (!ipString || !portString) {
+            fclose(procTcp);
+            return false;
+        }
+        char * portComp = "0D9B";
+        // just be sure...
+        char * sTemp = portString;
+        while (*sTemp = toupper(*sTemp))
+            sTemp++;
+        // port 3483?
+        if ((u32_t *)portComp[0] == (u32_t *)portString[0]) {
+            fclose(procTcp);
+            printf ("found %s ", ipString);
+            foundIp = strtoul(ipString, NULL, 16);
+            if (foundIp != *ip) {
+                *ip = foundIp;
+                printf("is new address");
+                return true;
+            }
+            printf("same as before");
+            return false;
+        }
+    }
+}
 
 
 
@@ -420,7 +520,14 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     // Mainloop:
     //------------------------------------------------------------------------
+#define IP_SEARCH_TIMEOUT 30
+    int ipSearchCnt = IP_SEARCH_TIMEOUT; // every 3 s
     while( !stop_signal ) {
+        if (!ipSearchCnt--) {
+            ipSearchCnt = IP_SEARCH_TIMEOUT;
+            struct in_addr addr = inet_addr(server);
+            get_serverIPv4(&(addr.s_addr));
+        }
         printf("Polling: encoder value: %d\n", encoder->value);
         handlePlayPause();
         handleVolume();
