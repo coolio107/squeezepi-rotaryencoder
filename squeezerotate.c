@@ -13,6 +13,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <string.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <time.h>
 #include<pthread.h>
 #include <curl/curl.h>
@@ -156,7 +157,7 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
 // returns true if server IP was found and changed
 bool get_serverIPv4(uint32_t *ip) {
     uint32_t foundIp;
-    FILE * procTcp = fopen("/proc/net/tcp");
+    FILE * procTcp = fopen("/proc/net/tcp", "r");
     if (!procTcp)
         return false;
     char line[256];
@@ -186,7 +187,7 @@ bool get_serverIPv4(uint32_t *ip) {
         while (*sTemp = toupper(*sTemp))
             sTemp++;
         // port 3483?
-        if ((uint32_t *)portComp[0] == (uint32_t *)portString[0]) {
+        if (*((uint32_t *)portComp) == *((uint32_t *)portString)) {
             fclose(procTcp);
             printf ("found %s ", ipString);
             foundIp = strtoul(ipString, NULL, 16);
@@ -526,7 +527,7 @@ int main( int argc, char *argv[] ) {
         if (!ipSearchCnt--) {
             ipSearchCnt = IP_SEARCH_TIMEOUT;
             in_addr_t addr = inet_addr(server);
-            get_serverIPv4(&(&addr));
+            get_serverIPv4(&addr);
         }
         printf("Polling: encoder value: %d\n", encoder->value);
         handlePlayPause();
