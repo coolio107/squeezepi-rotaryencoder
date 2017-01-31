@@ -193,10 +193,10 @@ bool get_serverIPv4(uint32_t *ip) {
             foundIp = strtoul(ipString, NULL, 16);
             if (foundIp != *ip) {
                 *ip = foundIp;
-                printf("is new address");
+                printf("is new address\n");
                 return true;
             }
-            printf("same as before");
+            printf("same as before\n");
             return false;
         }
     }
