@@ -105,7 +105,7 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
 
 // mac address. From SqueezeLite so should match that behaviour.
 // search first 4 interfaces returned by IFCONF
-void get_mac(uint8_t mac[]) {
+/*void get_mac(uint8_t mac[]) {
     char *utmac;
     struct ifconf ifc;
     struct ifreq *ifr, *ifend;
@@ -151,7 +151,7 @@ void get_mac(uint8_t mac[]) {
     }
     
     close(s);
-}
+}*/
 
 // returns true if server IP was found and changed
 bool get_serverIPv4(uint32_t *ip) {
