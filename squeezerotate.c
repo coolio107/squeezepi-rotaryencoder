@@ -425,7 +425,7 @@ static volatile bool commLock;
 static pthread_mutex_t lock;
 
 static char * server = "192.168.0.25";
-static long port = 9200;
+static uint32_t port = 9200;
 static char * MAC = "7c:dd:90:a3:fd:6a";
 static struct curl_slist * headerList = NULL;
 static struct curl_slist * targetList = NULL;
@@ -550,7 +550,8 @@ void buttonPress(const struct button * button, int change) {
     }
 }
 
-bool waiting4port = false;
+static bool waiting4port = false;
+static in_addr_t foundAddr = 0;
 
 void updateServer () {
     in_addr_t addr = inet_addr(server);
@@ -559,14 +560,28 @@ void updateServer () {
         return;
     }
     waiting4port = true;
+    foundAddr = addr;
     sendDicovery(addr);
 }
 
 void pollPort() {
-    if (!waiting4port)
+    if (!waiting4port || !foundAddr)
         return;
-    in_addr_t addr = inet_addr(server);
-    uint32_t port = readDiscovery(addr);
+    //in_addr_t addr = inet_addr(server);
+    uint32_t foundPort = readDiscovery(foundAddr);
+    
+    // now we have it all....
+    if (port) {
+        static char server[16];
+        struct in_addr addr;
+        addr.s_addr = foundAddr;
+        char * aAddr = inet_ntoa(addr);
+        printf("Address found: %s", aAddr);
+        strncpy(server, addr, 16);
+        MAC = server;
+        port = foundPort;
+        waiting4port = false;
+    }
 }
 
 
@@ -622,6 +637,7 @@ int main( int argc, char *argv[] ) {
     static char macBuf[18];
     sprintf(macBuf, "%X:%X:%X:%X:%X:%X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     MAC = macBuf;
+    printf("MAC: %s", MAC);
     
     
 
@@ -643,8 +659,8 @@ int main( int argc, char *argv[] ) {
     //------------------------------------------------------------------------
     // Mainloop:
     //------------------------------------------------------------------------
-#define IP_SEARCH_TIMEOUT 30
-    int ipSearchCnt = IP_SEARCH_TIMEOUT; // every 3 s
+#define IP_SEARCH_TIMEOUT 30 // every 3 s
+    int ipSearchCnt = 1;
     while( !stop_signal ) {
         if (!ipSearchCnt--) {
             ipSearchCnt = IP_SEARCH_TIMEOUT;
