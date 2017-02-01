@@ -213,7 +213,7 @@ bool get_serverIPv4(uint32_t *ip) {
 static int udpSocket = 0;
 static uint32_t udpAddress;
 # define SIZE_SERVER_DISCOVERY_LONG 23
-# define SBS_UDP_PORT 3546
+# define SBS_UDP_PORT 3483
 
 // get port through server discovery
 
