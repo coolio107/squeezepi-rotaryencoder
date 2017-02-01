@@ -233,8 +233,7 @@ void sendDicovery(uint32_t address) {
     struct sockaddr_in addr4;
     memset(&addr4, 0, sizeof(addr4));
     addr4.sin_family = AF_INET;
-    int x = rand() % 2;
-    addr4.sin_port = htons(SBS_UDP_PORT + x);
+    addr4.sin_port = htons(SBS_UDP_PORT);
     addr4.sin_addr.s_addr = address;
     
     char * data = "eIPAD\0NAME\0JSON\0UUID\0\0\0";
@@ -264,7 +263,7 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     
     if ((size <= 0) ||
         (buffer[0] != 'E')) {
-        printf("discovery: no reply, yet");
+        printf("discovery: no reply, yet\n");
         return NULL;
     }
     
@@ -278,7 +277,22 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     char UUID[256];
     memset(UUID, 0, sizeof(UUID));
     while (pos < (size - 5)) {
-        strncpy(code, buffer + pos, 4);
+        unsigned int fieldLen = buffer[pos + 4];
+        switch (*((uint32_t *)(buffer + pos))) {
+            case 'NAME':
+                strncpy(name, buffer + pos + 5, MIN(fieldLen, sizeof(name)));
+                break;
+            case 'JSON':
+                strncpy(port, buffer + pos + 5, MIN(fieldLen, sizeof(port)));
+                break;
+            case 'UUID':
+                strncpy(UUID, buffer + pos + 5, MIN(fieldLen, sizeof(UUID)));
+                break;
+            default:
+        }
+        pos += fieldLen + 5;
+        
+        /*strncpy(code, buffer + pos, 4);
         pos += 4;
         unsigned int fieldLen = buffer[pos];
         pos++;
@@ -289,9 +303,10 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
         } else if (!strcmp(code, "UUID")) {
             strncpy(UUID, buffer + pos, MIN(fieldLen, sizeof(UUID)));
         }
-        pos += fieldLen;
+        pos += fieldLen;*/
     }
     printf("port: %s, name: %s, uuid: %s\n", port, name, UUID);
+    close(udpSocket);
     return NULL;
 }
 
