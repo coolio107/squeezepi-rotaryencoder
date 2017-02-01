@@ -254,14 +254,15 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     returnAddr.sin_family = AF_INET;
     //returnAddr.sin_port = htons(SBS_UDP_PORT);
     returnAddr.sin_addr.s_addr = address;
-    returnAddr.sin_len = sizeof(returnAddr);
+    //returnAddr.sin_len = sizeof(returnAddr);
+    socklen_t addrSize = sizeof(returnAddr);
     
     ssize_t size = recvfrom(udpSocket,
                             (void *)buffer,
                             sizeof(buffer),
                             MSG_DONTWAIT,
-                            &returnAddr,
-                            sizeof(returnAddr));
+                            (struct sockaddr *)&returnAddr,
+                            &addrSize);
     
     if (size <= 0)
         return NULL;
@@ -279,16 +280,17 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     memset(UUID, 0, sizeof(UUID));
     while (pos < (size - 5)) {
         strncpy(code, buffer + pos, 4);
-        post += 4;
+        pos += 4;
         unsigned int fieldLen = buffer[pos];
         pos++;
         if (!strcmp(code, "NAME")) {
-            strncpy(name, buffer + pos, min(fieldLen, sizeof(name)));
+            strncpy(name, buffer + pos, MIN(fieldLen, sizeof(name)));
         } else if (!strcmp(code, "JSON")) {
-            strncpy(port, buffer + pos, min(fieldLen, sizeof(port)));
+            strncpy(port, buffer + pos, MIN(fieldLen, sizeof(port)));
         } else if (!strcmp(code, "UUID")) {
-            strncpy(UUID, buffer + pos, min(fieldLen, sizeof(UUID)));
+            strncpy(UUID, buffer + pos, MIN(fieldLen, sizeof(UUID)));
         }
+        pos += fieldLen;
     }
     printf("port: %s, name: %s, uuid: %s\n", port, name, UUID);
     return NULL;
