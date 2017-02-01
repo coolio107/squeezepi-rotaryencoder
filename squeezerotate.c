@@ -22,6 +22,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/param.h>
 
 #include <wiringPi.h>
 
@@ -555,7 +556,7 @@ void updateServer () {
         return;
     }
     waiting4port = true;
-    sendDicovery(address);
+    sendDicovery(addr);
 }
 
 void pollPort() {
