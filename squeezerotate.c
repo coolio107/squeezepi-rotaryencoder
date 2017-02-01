@@ -572,7 +572,7 @@ void pollPort() {
     uint32_t foundPort = readDiscovery(foundAddr);
     
     // now we have it all....
-    if (port) {
+    if (foundPort) {
         static char foundServer[16];
         struct in_addr addr;
         addr.s_addr = foundAddr;
