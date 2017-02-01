@@ -220,7 +220,7 @@ void sendDicovery(uint32_t address) {
     int yes = 1;
     /*		int err1 = */setsockopt(udpSocket, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int));
     setsockopt(udpSocket, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes));
-    setsockopt(udpSocket, SOL_SOCKET, SO_NOSIGPIPE, (void *)&yes, sizeof(int));
+    //setsockopt(udpSocket, SOL_SOCKET, SO_NOSIGPIPE, (void *)&yes, sizeof(int));
     // nonblocking socket
     /*int rc = fcntl( udpSocket, F_GETFL );
     if( rc>=0 )
@@ -238,7 +238,7 @@ void sendDicovery(uint32_t address) {
     addr4.sin_family = AF_INET;
     addr4.sin_port = htons(SBS_UDP_PORT);
     addr4.sin_addr.s_addr = address;
-    addr4.sin_len = sizeof(addr4);
+    //addr4.sin_len = sizeof(addr4); BSD/OSX
     
     char * data = "eIPAD\0NAME\0JSON\0UUID\0\0\0";
     
@@ -258,6 +258,7 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     
     ssize_t size = recvfrom(udpSocket,
                             (void *)buffer,
+                            sizeof(buffer),
                             MSG_DONTWAIT,
                             &returnAddr,
                             sizeof(returnAddr));
