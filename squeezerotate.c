@@ -174,12 +174,17 @@ bool get_serverIPv4(uint32_t *ip) {
         char * target = strtok(NULL, " "); // target address
         printf("target: %s\n", target);
         if (!target) {
+            printf("no target\n");
             fclose(procTcp);
             return false;
         }
         char * ipString = strtok(target, ":");
         char * portString = strtok(NULL, ":");
         if (!ipString || !portString) {
+            if (!ipString)
+                printf("no ipString\n");
+            else
+                printf("no portString\n");
             fclose(procTcp);
             return false;
         }
