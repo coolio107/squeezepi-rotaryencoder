@@ -577,7 +577,7 @@ void pollPort() {
         addr.s_addr = foundAddr;
         char * aAddr = inet_ntoa(addr);
         printf("Address found: %s", aAddr);
-        strncpy(server, addr, 16);
+        strncpy(server, aAddr, 16);
         MAC = server;
         port = foundPort;
         waiting4port = false;
