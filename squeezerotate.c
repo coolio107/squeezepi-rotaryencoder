@@ -274,7 +274,7 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     char port[6];
     strncpy(port, "9000\0", 6);
     char name[256];
-    memset(name, 0, sizeof(memset));
+    memset(name, 0, sizeof(name));
     char UUID[256];
     memset(UUID, 0, sizeof(UUID));
     while (pos < (size - 5)) {
