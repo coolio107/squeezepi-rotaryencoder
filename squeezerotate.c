@@ -289,6 +289,7 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
                 strncpy(UUID, buffer + pos + 5, MIN(fieldLen, sizeof(UUID)));
                 break;
             default:
+                break;
         }
         pos += fieldLen + 5;
         
