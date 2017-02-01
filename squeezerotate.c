@@ -279,7 +279,7 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     while (pos < (size - 5)) {
         unsigned int fieldLen = buffer[pos + 4];
         switch (*((uint32_t *)(buffer + pos))) {
-            case 'NAME':
+            case 'EMAN':
                 strncpy(name, buffer + pos + 5, MIN(fieldLen, sizeof(name)));
                 break;
             case 'JSON':
