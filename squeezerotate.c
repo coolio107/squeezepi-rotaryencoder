@@ -221,7 +221,7 @@ static uint32_t udpAddress;
 // get port through server discovery
 
 // send server discovery
-void sendDicovery(uint32_t address) {
+void sendDiscovery(uint32_t address) {
     if (udpSocket)
         close(udpSocket);
     // create discovery socket
@@ -455,6 +455,7 @@ bool sendCommand(char * fragment) {
     curl_easy_setopt(curl, CURLOPT_URL, "http://localhost/jsonrpc.js");
     char target[100];
     snprintf(target, 100, "::%s:%d", server, port);
+    printf("Target: %s\n", target);
     targetList = curl_slist_append(targetList, target);
     curl_easy_setopt(curl, CURLOPT_CONNECT_TO, targetList);
     //curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1);
@@ -561,7 +562,7 @@ void updateServer () {
     }
     waiting4port = true;
     foundAddr = addr;
-    sendDicovery(addr);
+    sendDiscovery(addr);
 }
 
 void pollPort() {
@@ -635,7 +636,7 @@ int main( int argc, char *argv[] ) {
     uint8_t mac[6];
     get_mac(mac);
     static char macBuf[18];
-    sprintf(macBuf, "%X:%X:%X:%X:%X:%X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    sprintf(macBuf, "%x:%x:%x:%x:%x:%x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     MAC = macBuf;
     printf("MAC: %s", MAC);
     
