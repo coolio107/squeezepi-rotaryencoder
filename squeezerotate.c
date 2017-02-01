@@ -15,7 +15,7 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <stdbool.h>
 #include <ctype.h>
 #include <time.h>
-#include<pthread.h>
+#include <pthread.h>
 #include <curl/curl.h>
 
 #include <netdb.h>
@@ -23,6 +23,8 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/param.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 
 #include <wiringPi.h>
 
@@ -108,7 +110,7 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
 
 // mac address. From SqueezeLite so should match that behaviour.
 // search first 4 interfaces returned by IFCONF
-/*void get_mac(uint8_t mac[]) {
+void get_mac(uint8_t mac[]) {
     char *utmac;
     struct ifconf ifc;
     struct ifreq *ifr, *ifend;
@@ -154,7 +156,11 @@ struct encoder *setupencoder(int pin_a, int pin_b, rotaryencoder_callback_t call
     }
     
     close(s);
-}*/
+}
+
+
+
+
 
 // returns true if server IP was found and changed
 bool get_serverIPv4(uint32_t *ip) {
@@ -168,23 +174,20 @@ bool get_serverIPv4(uint32_t *ip) {
         return false;
     }
     while (fgets(line, 255, procTcp)) {
-        printf("line: %s\n", line);
+        //printf("line: %s\n", line);
         strtok(line, " "); // line number
         strtok(NULL, " "); // source address
         char * target = strtok(NULL, " "); // target address
-        printf("target: %s\n", target);
+        //printf("target: %s\n", target);
         if (!target) {
-            printf("no target\n");
+            //printf("no target\n");
             fclose(procTcp);
             return false;
         }
         char * ipString = strtok(target, ":");
         char * portString = strtok(NULL, ":");
         if (!ipString || !portString) {
-            if (!ipString)
-                printf("no ipString\n");
-            else
-                printf("no portString\n");
+            //printf((portString) ? "no ipString\n" : "no portString");
             fclose(procTcp);
             return false;
         }
@@ -245,7 +248,7 @@ void sendDicovery(uint32_t address) {
 // poll udp port for discovery reply
 #define BUFSIZE 1600
 #define STRTOU32(x) (*((uint32_t *)x))
-struct sockaddr_in * readDiscovery(uint32_t address) {
+uint32_t readDiscovery(uint32_t address) {
     char buffer[BUFSIZE];
     static struct sockaddr_in returnAddr;
     memset(&returnAddr, 0, sizeof(returnAddr));
@@ -264,13 +267,15 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     
     if ((size <= 0) ||
         (buffer[0] != 'E')) {
-        printf("discovery: no reply, yet\n");
-        return NULL;
+        //printf("discovery: no reply, yet\n");
+        return 0;
     }
     
     unsigned int pos = 1;
     char code[5];
     code[4] = 0;
+    // this is the whole packet interpretation for debug purposes
+    // not needed in final code
     char port[6];
     strncpy(port, "9000\0", 6);
     char name[256];
@@ -288,39 +293,11 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
             strncpy(UUID, buffer + pos + 5, MIN(fieldLen, sizeof(UUID)));
         }
         pos += fieldLen + 5;
-        
-        /*switch (*((uint32_t *)(buffer + pos))) {
-            case (uint32_t)'EMAN':
-                strncpy(name, buffer + pos + 5, MIN(fieldLen, sizeof(name)));
-                break;
-            case 'JSON':
-                strncpy(port, buffer + pos + 5, MIN(fieldLen, sizeof(port)));
-                break;
-            case 'UUID':
-                strncpy(UUID, buffer + pos + 5, MIN(fieldLen, sizeof(UUID)));
-                break;
-            default:
-                break;
-        }
-        pos += fieldLen + 5;
-         */
-        
-        /*strncpy(code, buffer + pos, 4);
-        pos += 4;
-        unsigned int fieldLen = buffer[pos];
-        pos++;
-        if (!strcmp(code, "NAME")) {
-            strncpy(name, buffer + pos, MIN(fieldLen, sizeof(name)));
-        } else if (!strcmp(code, "JSON")) {
-            strncpy(port, buffer + pos, MIN(fieldLen, sizeof(port)));
-        } else if (!strcmp(code, "UUID")) {
-            strncpy(UUID, buffer + pos, MIN(fieldLen, sizeof(UUID)));
-        }
-        pos += fieldLen;*/
     }
     printf("port: %s, name: %s, uuid: %s\n", port, name, UUID);
     close(udpSocket);
-    return NULL;
+    
+    return strtoul(port, NULL, 10);
 }
 
 
@@ -589,7 +566,7 @@ void pollPort() {
     if (!waiting4port)
         return;
     in_addr_t addr = inet_addr(server);
-    readDiscovery(addr);
+    uint32_t port = readDiscovery(addr);
 }
 
 
