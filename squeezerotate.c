@@ -264,7 +264,7 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     
     if ((size <= 0) ||
         (buffer[0] != 'E')) {
-        printf(@"discovery: no reply, yet");
+        printf("discovery: no reply, yet");
         return NULL;
     }
     
