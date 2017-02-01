@@ -244,6 +244,7 @@ void sendDicovery(uint32_t address) {
 
 // poll udp port for discovery reply
 #define BUFSIZE 1600
+#define STRTOU32(x) (*((uint32_t *)x))
 struct sockaddr_in * readDiscovery(uint32_t address) {
     char buffer[BUFSIZE];
     static struct sockaddr_in returnAddr;
@@ -278,7 +279,17 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     memset(UUID, 0, sizeof(UUID));
     while (pos < (size - 5)) {
         unsigned int fieldLen = buffer[pos + 4];
-        switch (*((uint32_t *)(buffer + pos))) {
+        uint32_t * selector = (uint32_t *)(buffer + pos);
+        if (selector == STRTOU32("NAME")) {
+            strncpy(name, buffer + pos + 5, MIN(fieldLen, sizeof(name)));
+        } else if (selector == STRTOU32("JSON")) {
+            strncpy(port, buffer + pos + 5, MIN(fieldLen, sizeof(port)));
+        } else if (selector == STRTOU32("UUID")) {
+            strncpy(UUID, buffer + pos + 5, MIN(fieldLen, sizeof(UUID)));
+        }
+        pos += fieldLen + 5;
+        
+        /*switch (*((uint32_t *)(buffer + pos))) {
             case (uint32_t)'EMAN':
                 strncpy(name, buffer + pos + 5, MIN(fieldLen, sizeof(name)));
                 break;
@@ -292,6 +303,7 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
                 break;
         }
         pos += fieldLen + 5;
+         */
         
         /*strncpy(code, buffer + pos, 4);
         pos += 4;
