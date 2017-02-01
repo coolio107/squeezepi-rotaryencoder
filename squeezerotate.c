@@ -572,13 +572,13 @@ void pollPort() {
     
     // now we have it all....
     if (port) {
-        static char server[16];
+        static char foundServer[16];
         struct in_addr addr;
         addr.s_addr = foundAddr;
         char * aAddr = inet_ntoa(addr);
         printf("Address found: %s", aAddr);
-        strncpy(server, aAddr, 16);
-        MAC = server;
+        strncpy(foundServer, aAddr, 16);
+        server = foundServer;
         port = foundPort;
         waiting4port = false;
     }
