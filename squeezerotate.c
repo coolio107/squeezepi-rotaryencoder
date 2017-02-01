@@ -18,9 +18,10 @@ SqueezeRotate - Sets the volume of a squeezebox player running on a raspberry pi
 #include<pthread.h>
 #include <curl/curl.h>
 
-#include <sys/socket.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include <wiringPi.h>
 
@@ -199,13 +200,98 @@ bool get_serverIPv4(uint32_t *ip) {
             printf("same as before\n");
             return false;
         }
+        fclose(procTcp);
     }
 }
 
+static int udpSocket = 0;
+static uint32_t udpAddress;
+# define SIZE_SERVER_DISCOVERY_LONG 23
+# define SBS_UDP_PORT 3546
 
+// get port through server discovery
 
+void sendDicovery(uint32_t address) {
+    if (udpSocket)
+        close(udpSocket);
+    // create discovery socket
+    udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    
+    int yes = 1;
+    /*		int err1 = */setsockopt(udpSocket, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int));
+    setsockopt(udpSocket, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes));
+    setsockopt(udpSocket, SOL_SOCKET, SO_NOSIGPIPE, (void *)&yes, sizeof(int));
+    // nonblocking socket
+    /*int rc = fcntl( udpSocket, F_GETFL );
+    if( rc>=0 )
+        rc = fcntl( udpSocket, F_SETFL, rc|O_NONBLOCK );
+    else {
+        close(udpSocket);
+        udpSocket = 0;
+        return;
+    }*/
+    
+    // send packet
+    udpAddress = address;
+    struct sockaddr_in addr4;
+    memset(&addr4, 0, sizeof(addr4));
+    addr4.sin_family = AF_INET;
+    addr4.sin_port = htons(SBS_UDP_PORT);
+    addr4.sin_addr.s_addr = address;
+    addr4.sin_len = sizeof(addr4);
+    
+    char * data = "eIPAD\0NAME\0JSON\0UUID\0\0\0";
+    
+    ssize_t error;
+    error = sendto(udpSocket, data, SIZE_SERVER_DISCOVERY_LONG, 0, (struct sockaddr*)&addr4, sizeof(addr4));
+}
 
-
+#define BUFSIZE 1600
+struct sockaddr_in * readDiscovery(uint32_t address) {
+    char buffer[BUFSIZE];
+    static struct sockaddr_in returnAddr;
+    memset(&returnAddr, 0, sizeof(returnAddr));
+    returnAddr.sin_family = AF_INET;
+    //returnAddr.sin_port = htons(SBS_UDP_PORT);
+    returnAddr.sin_addr.s_addr = address;
+    returnAddr.sin_len = sizeof(returnAddr);
+    
+    ssize_t size = recvfrom(udpSocket,
+                            (void *)buffer,
+                            MSG_DONTWAIT,
+                            &returnAddr,
+                            sizeof(returnAddr));
+    
+    if (size <= 0)
+        return NULL;
+    if (buffer[0] != 'E')
+        return NULL;
+    
+    unsigned int pos = 1;
+    char code[5];
+    code[4] = 0;
+    char port[6];
+    strncpy(port, "9000\0", 6);
+    char name[256];
+    memset(name, 0, sizeof(memset));
+    char UUID[256];
+    memset(UUID, 0, sizeof(UUID));
+    while (pos < (size - 5)) {
+        strncpy(code, buffer + pos, 4);
+        post += 4;
+        unsigned int fieldLen = buffer[pos];
+        pos++;
+        if (!strcmp(code, "NAME")) {
+            strncpy(name, buffer + pos, min(fieldLen, sizeof(name)));
+        } else if (!strcmp(code, "JSON")) {
+            strncpy(port, buffer + pos, min(fieldLen, sizeof(port)));
+        } else if (!strcmp(code, "UUID")) {
+            strncpy(UUID, buffer + pos, min(fieldLen, sizeof(UUID)));
+        }
+    }
+    printf("port: %s, name: %s, uuid: %s\n", port, name, UUID);
+    return NULL;
+}
 
 
 
@@ -457,6 +543,25 @@ void buttonPress(const struct button * button, int change) {
     }
 }
 
+bool waiting4port = false;
+
+void updateServer () {
+    in_addr_t addr = inet_addr(server);
+    bool change = get_serverIPv4(&addr);
+    if (!change) {
+        return;
+    }
+    waiting4port = true;
+    sendDicovery(address);
+}
+
+void pollPort() {
+    if (!waiting4port)
+        return;
+    in_addr_t addr = inet_addr(server);
+    readDiscovery(addr);
+}
+
 
 int main( int argc, char *argv[] ) {
     FILE            *fp;
@@ -526,9 +631,9 @@ int main( int argc, char *argv[] ) {
     while( !stop_signal ) {
         if (!ipSearchCnt--) {
             ipSearchCnt = IP_SEARCH_TIMEOUT;
-            in_addr_t addr = inet_addr(server);
-            get_serverIPv4(&addr);
+            updateServer();
         }
+        pollPort();
         printf("Polling: encoder value: %d\n", encoder->value);
         handlePlayPause();
         handleVolume();
