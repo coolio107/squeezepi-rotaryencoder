@@ -217,6 +217,7 @@ static uint32_t udpAddress;
 
 // get port through server discovery
 
+// send server discovery
 void sendDicovery(uint32_t address) {
     if (udpSocket)
         close(udpSocket);
@@ -224,27 +225,17 @@ void sendDicovery(uint32_t address) {
     udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     
     int yes = 1;
-    /*		int err1 = */setsockopt(udpSocket, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int));
+    setsockopt(udpSocket, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int));
     setsockopt(udpSocket, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes));
-    //setsockopt(udpSocket, SOL_SOCKET, SO_NOSIGPIPE, (void *)&yes, sizeof(int));
-    // nonblocking socket
-    /*int rc = fcntl( udpSocket, F_GETFL );
-    if( rc>=0 )
-        rc = fcntl( udpSocket, F_SETFL, rc|O_NONBLOCK );
-    else {
-        close(udpSocket);
-        udpSocket = 0;
-        return;
-    }*/
     
     // send packet
     udpAddress = address;
     struct sockaddr_in addr4;
     memset(&addr4, 0, sizeof(addr4));
     addr4.sin_family = AF_INET;
-    addr4.sin_port = htons(SBS_UDP_PORT);
+    int x = rand() % 2;
+    addr4.sin_port = htons(SBS_UDP_PORT + x);
     addr4.sin_addr.s_addr = address;
-    //addr4.sin_len = sizeof(addr4); BSD/OSX
     
     char * data = "eIPAD\0NAME\0JSON\0UUID\0\0\0";
     
@@ -252,6 +243,7 @@ void sendDicovery(uint32_t address) {
     error = sendto(udpSocket, data, SIZE_SERVER_DISCOVERY_LONG, 0, (struct sockaddr*)&addr4, sizeof(addr4));
 }
 
+// poll udp port for discovery reply
 #define BUFSIZE 1600
 struct sockaddr_in * readDiscovery(uint32_t address) {
     char buffer[BUFSIZE];
