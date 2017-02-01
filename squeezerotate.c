@@ -206,8 +206,8 @@ bool get_serverIPv4(uint32_t *ip) {
             printf("same as before\n");
             return false;
         }
-        fclose(procTcp);
     }
+    fclose(procTcp);
 }
 
 static int udpSocket = 0;
