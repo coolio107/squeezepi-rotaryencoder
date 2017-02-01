@@ -280,11 +280,11 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
     while (pos < (size - 5)) {
         unsigned int fieldLen = buffer[pos + 4];
         uint32_t * selector = (uint32_t *)(buffer + pos);
-        if (selector == STRTOU32("NAME")) {
+        if (*selector == STRTOU32("NAME")) {
             strncpy(name, buffer + pos + 5, MIN(fieldLen, sizeof(name)));
-        } else if (selector == STRTOU32("JSON")) {
+        } else if (*selector == STRTOU32("JSON")) {
             strncpy(port, buffer + pos + 5, MIN(fieldLen, sizeof(port)));
-        } else if (selector == STRTOU32("UUID")) {
+        } else if (*selector == STRTOU32("UUID")) {
             strncpy(UUID, buffer + pos + 5, MIN(fieldLen, sizeof(UUID)));
         }
         pos += fieldLen + 5;
