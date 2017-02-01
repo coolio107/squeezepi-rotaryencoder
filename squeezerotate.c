@@ -262,10 +262,11 @@ struct sockaddr_in * readDiscovery(uint32_t address) {
                             (struct sockaddr *)&returnAddr,
                             &addrSize);
     
-    if (size <= 0)
+    if ((size <= 0) ||
+        (buffer[0] != 'E')) {
+        printf(@"discovery: no reply, yet");
         return NULL;
-    if (buffer[0] != 'E')
-        return NULL;
+    }
     
     unsigned int pos = 1;
     char code[5];
