@@ -201,6 +201,7 @@ void handle_encoders(struct sbpd_server * server) {
         //  ignore if > 100: overflow
         //
         int delta = (int)(encoder_ctrls[cnt].gpio_encoder->value - encoder_ctrls[cnt].last_value);
+        logdebug("Encoder delta: %d", delta);
         if (delta > 100)
             delta = 0;  //
         if (delta != 0) {

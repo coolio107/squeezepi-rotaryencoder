@@ -65,6 +65,7 @@ static in_addr_t foundAddr = 0;
 void poll_discovery(sbpd_config_parameters_t config,
                     sbpd_config_parameters_t *discovered,
                     struct sbpd_server * server) {
+    logdebug("Polling server discovery");
     //
     // search for server
     //
