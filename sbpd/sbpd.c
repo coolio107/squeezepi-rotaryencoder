@@ -156,12 +156,13 @@ int main(int argc, char * argv[]) {
     //  Initialize server communication
     //
     init_comm(MAC);
-
+    
     //
     //
     // Main Loop
     //
     //
+    loginfo("Starting main loop polling");
     while( !stop_signal ) {
         //
         //  Poll the server discovery
@@ -205,14 +206,17 @@ parse_opt (int key, char *arg, struct argp_state *state)
             //
             //  Verbose mode
         case 'v':
+            loginfo("Options parsing: Set verbose mode");
             streamloglevel = LOG_DEBUG;
             break;
             //  Silent Mode
         case 's':
             streamloglevel = 0;
+            loginfo("Options parsing: Set quiet mode");
             break;
             //  Daemonize
         case 'd':
+            loginfo("Options parsing: Daemonize (todo)");
             break;
             
             //
@@ -221,6 +225,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
             //  MAC Address
         case 'M':
             MAC = arg;
+            loginfo("Options parsing: Manually set MAC: %s", MAC);
             configured_parameters |= SBPD_cfg_MAC;
             break;
             
@@ -230,21 +235,25 @@ parse_opt (int key, char *arg, struct argp_state *state)
             //  Server address
         case 'A':
             server.host = arg;
+            loginfo("Options parsing: Manually set http address %s", server.host);
             configured_parameters |= SBPD_cfg_host;
             break;
             //  Server port
         case 'P':
             server.port = (uint32_t)strtoul(arg, NULL, 10);
+            loginfo("Options parsing: Manually set http port %s", server.port);
             configured_parameters |= SBPD_cfg_port;
             break;
             //  Server user name
         case 'u':
             server.user = arg;
+            loginfo("Options parsing: Manually set user name");
             configured_parameters |= SBPD_cfg_user;
             break;
             //  Server user name
         case 'p':
             server.password = arg;
+            loginfo("Options parsing: Manually set http password");
             configured_parameters |= SBPD_cfg_password;
             break;
             
@@ -283,6 +292,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
                 return ARGP_ERR_UNKNOWN;
             switch (code[0]) {
                 case 'e': {
+                    loginfo("Options parsing: configure rotary encoder");
                     char * string = strtok(NULL, ",");
                     int p1 = 0;
                     if (string)

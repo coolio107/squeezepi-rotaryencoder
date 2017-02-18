@@ -107,6 +107,7 @@ bool send_command(struct sbpd_server * server, char * fragment) {
 //
 //
 int init_comm(char * use_mac) {
+    loginfo("Initializing CURL");
     MAC = use_mac;
     //
     //  Setup mutex lock for comm - unused

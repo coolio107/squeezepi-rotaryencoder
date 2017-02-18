@@ -190,6 +190,7 @@ struct encoder *setupencoder(int pin_a,
 //
 //
 void init_GPIO() {
+    loginfo("Initializing GPIO");
     wiringPiSetupGpio() ;
 }
 

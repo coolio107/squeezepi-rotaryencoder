@@ -13,6 +13,7 @@
 #include "sbpd.h"
 #include "control.h"
 #include "servercomm.h"
+#include <wiringPi.h>
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
@@ -101,6 +102,11 @@ int setup_button_ctrl(char * cmd, int pin, int edge) {
     button_ctrls[numberofbuttons].waiting = false;
     button_ctrls[numberofbuttons].gpio_button = gpio_b;
     numberofbuttons++;
+    loginfo("Button defined: Pin %d, Edge: %s, Fragment: \n%s",
+            pin,
+            ((edge != INT_EDGE_FALLING) && (edge != INT_EDGE_RISING)) ? "both" :
+            (edge == INT_EDGE_FALLING) ? "falling" : "rising",
+            fragment);
     return 0;
 }
 
@@ -112,6 +118,7 @@ int setup_button_ctrl(char * cmd, int pin, int edge) {
 void handle_buttons(struct sbpd_server * server) {
     for (int cnt = 0; cnt < numberofbuttons; cnt++) {
         if (button_ctrls[cnt].waiting) {
+            loginfo("Button pressed: Pin %d", button_ctrls[cnt].gpio_button->pin);
             send_command(server, button_ctrls[cnt].fragment);
         }
     }
@@ -159,6 +166,11 @@ int setup_encoder_ctrl(char * cmd, int pin1, int pin2, int edge) {
     encoder_ctrls[numberofencoders].gpio_encoder = gpio_e;
     encoder_ctrls[numberofencoders].last_value = 0;
     numberofencoders++;
+    loginfo("Rotary encoder defined: Pin %d, %d, Edge: %s, Fragment: \n%s",
+            pin1, pin2,
+            ((edge != INT_EDGE_FALLING) && (edge != INT_EDGE_RISING)) ? "both" :
+            (edge == INT_EDGE_FALLING) ? "falling" : "rising",
+            fragment);
     return 0;
 }
 
