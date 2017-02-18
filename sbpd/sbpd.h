@@ -11,17 +11,7 @@
 #ifndef sbpd_h
 #define sbpd_h
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <time.h>
-#include <pthread.h>
-#include <curl/curl.h>
-
+#include <stdint.h>
 #include <syslog.h>
 
 #define USER_AGENT  "SqueezeButtonPi"
