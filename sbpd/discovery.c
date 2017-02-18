@@ -65,11 +65,12 @@ static in_addr_t foundAddr = 0;
 void poll_discovery(sbpd_config_parameters_t config,
                     sbpd_config_parameters_t *discovered,
                     struct sbpd_server * server) {
-    logdebug("Polling server discovery");
+    //logdebug("Polling server discovery");
     //
     // search for server
     //
     if (!(config & SBPD_cfg_host)) {
+        loginfo("Searching for server");
         if (!search_timer--) {
             search_timer = IP_SEARCH_TIMEOUT * SCD_SECOND / SCD_SLEEP_TIMEOUT;
             in_addr_t addr = inet_addr(server->host);
@@ -96,6 +97,7 @@ void poll_discovery(sbpd_config_parameters_t config,
     //
     if (!(config & SBPD_cfg_port) &&
         !(*discovered & SBPD_cfg_port)) {
+        loginfo("Looking for port");
         uint32_t foundPort = read_discovery(foundAddr);
         if (foundPort) {
             loginfo("Squeezebox control port found: %d", foundPort);
@@ -247,6 +249,7 @@ uint32_t read_discovery(uint32_t address) {
         return 0;
     }
     
+    logdebug("Server discovery: packet found");
     unsigned int pos = 1;
     char code[5];
     code[4] = 0;
@@ -272,6 +275,16 @@ uint32_t read_discovery(uint32_t address) {
             pos += fieldLen + 5;
         }
         loginfo("discovery packet: port: %s, name: %s, uuid: %s", port, name, UUID);
+    } else {
+        while (pos < (size - 5)) {
+            unsigned int fieldLen = buffer[pos + 4];
+            uint32_t * selector = (uint32_t *)(buffer + pos);
+            if (*selector == STRTOU32("JSON")) {
+                strncpy(port, buffer + pos + 5, MIN(fieldLen, sizeof(port)));
+            }
+            pos += fieldLen + 5;
+        }
+        loginfo("discovery packet: port: %s", port);
     }
     close(udpSocket);
     
