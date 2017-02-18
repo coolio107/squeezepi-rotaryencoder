@@ -11,7 +11,7 @@
 #ifndef sbpd_h
 #define sbpd_h
 
-#include <ctype.h>
+#include <stdlib.h>
 #include <syslog.h>
 
 #define USER_AGENT  "SqueezeButtonPi"
