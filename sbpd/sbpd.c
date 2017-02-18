@@ -153,6 +153,11 @@ int main(int argc, char * argv[]) {
     init_comm(MAC);
 
     //
+    //  Init GPIO
+    //
+    init_GPIO();
+    
+    //
     //
     // Main Loop
     //
