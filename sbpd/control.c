@@ -201,7 +201,6 @@ void handle_encoders(struct sbpd_server * server) {
         //  ignore if > 100: overflow
         //
         int delta = (int)(encoder_ctrls[cnt].gpio_encoder->value - encoder_ctrls[cnt].last_value);
-        logdebug("Encoder delta: %d", delta);
         if (delta > 100)
             delta = 0;  //
         if (delta != 0) {
@@ -213,9 +212,9 @@ void handle_encoders(struct sbpd_server * server) {
             char fragment[50];
             char * prefix = (delta > 0) ? "+" : "-";
             snprintf(fragment, sizeof(fragment),
-                     "[\"mixer\",\"volume\",\"%s%d\"]", prefix, abs(delta));
+                     encoder_ctrls[cnt].fragment, prefix, abs(delta));
             
-            if (send_command(server, button_ctrls[cnt].fragment)) {
+            if (send_command(server, fragment)) {
                 encoder_ctrls[cnt].last_value = encoder_ctrls[cnt].gpio_encoder->value;
                 //lasttimeVol = time; // chatter filter
             }

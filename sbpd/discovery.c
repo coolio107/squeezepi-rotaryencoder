@@ -69,7 +69,6 @@ void poll_discovery(sbpd_config_parameters_t config,
     // search for server
     //
     if (!(config & SBPD_cfg_host)) {
-        logdebug("Searching for server");
         if (!search_timer--) {
             search_timer = IP_SEARCH_TIMEOUT * SCD_SECOND / SCD_SLEEP_TIMEOUT;
             in_addr_t addr = 0;
