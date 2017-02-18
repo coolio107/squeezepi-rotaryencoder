@@ -116,6 +116,7 @@ int setup_button_ctrl(char * cmd, int pin, int edge) {
 //      server: the server to send commands to
 //
 void handle_buttons(struct sbpd_server * server) {
+    logdebug("Polling buttons");
     for (int cnt = 0; cnt < numberofbuttons; cnt++) {
         if (button_ctrls[cnt].waiting) {
             loginfo("Button pressed: Pin %d", button_ctrls[cnt].gpio_button->pin);
@@ -193,6 +194,7 @@ void handle_encoders(struct sbpd_server * server) {
         return;
     }*/
     
+    logdebug("Polling encoders");
     for (int cnt = 0; cnt < numberofencoders; cnt++) {
         //
         //  build volume delta
