@@ -70,11 +70,12 @@ void poll_discovery(sbpd_config_parameters_t config,
     // search for server
     //
     if (!(config & SBPD_cfg_host)) {
-        loginfo("Searching for server");
+        logdebug("Searching for server");
         if (!search_timer--) {
             search_timer = IP_SEARCH_TIMEOUT * SCD_SECOND / SCD_SLEEP_TIMEOUT;
             in_addr_t addr = inet_addr(server->host);
             bool change = get_serverIPv4(&addr);
+            logdebug("Server address %s", (change) ? "found" : "not found");
             if (change) {
                 //
                 // found server but not port
@@ -83,7 +84,7 @@ void poll_discovery(sbpd_config_parameters_t config,
                 *discovered &= ~SBPD_cfg_port;
                 foundAddr = addr;
                 
-                // we don't update server struct, yet if we also look for the port.
+                // we don't update server struct, yet, if we also look for the port.
                 if (config & SBPD_cfg_port)
                     _write_server_string(server, addr);
                 // otherwise: look for port
@@ -97,7 +98,7 @@ void poll_discovery(sbpd_config_parameters_t config,
     //
     if (!(config & SBPD_cfg_port) &&
         !(*discovered & SBPD_cfg_port)) {
-        loginfo("Looking for port");
+        logdebug("Looking for port");
         uint32_t foundPort = read_discovery(foundAddr);
         if (foundPort) {
             loginfo("Squeezebox control port found: %d", foundPort);
