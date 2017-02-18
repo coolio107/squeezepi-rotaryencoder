@@ -11,7 +11,6 @@
 
 #include "GPIO.h"
 #include "sbpd.h"
-#include <stdint.h>
 
 #include <wiringPi.h>
 
