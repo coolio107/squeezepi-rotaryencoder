@@ -49,9 +49,8 @@ bool get_mac(uint8_t mac[]);
 
 //
 // counter for search scheduling
-// initialized to 1 to run immediately on first call
 //
-static uint32_t search_timer = 1;
+static uint32_t search_timer = 0;
 //
 //  Helper variable; don't want to convert back and forth between string and net-addr
 //
@@ -73,7 +72,9 @@ void poll_discovery(sbpd_config_parameters_t config,
         logdebug("Searching for server");
         if (!search_timer--) {
             search_timer = IP_SEARCH_TIMEOUT * SCD_SECOND / SCD_SLEEP_TIMEOUT;
-            in_addr_t addr = inet_addr(server->host);
+            in_addr_t addr = 0;
+            if (server->host)
+                addr = inet_addr(server->host);
             bool change = get_serverIPv4(&addr);
             logdebug("Server address %s", (change) ? "found" : "not found");
             if (change) {
