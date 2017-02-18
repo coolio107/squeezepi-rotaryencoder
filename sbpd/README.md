@@ -1,5 +1,15 @@
-# squeezepi-rotaryencoder
-This is a tool to use a rotary-push encoder to control volume and play/pause for a SqueezeLite or other Squeezebox compatible software player on Raspberry Pi
+
+
+
+# SqeezeButtonPi Daemon
+SqueezeButtonPi Daemon or sbpd is a controller tool to use buttons and rotary encoders to control an instance of SqueezeLite or SqueezePlay running on the same Raspberry Pi device in connection with a Logitech Media Server/Squeezebox Server instance.
+
+Rotary encoders or rotary-push-encoders can be used for volume, buttons (and the push-function of a rotary encoder) can be used for play/pause, skip forward, skip back or toggle the power state.
+
+## Dependencies
+SqueezeButtonPi uses WiringPi
+
+## Configuration
 
 ## Security
 

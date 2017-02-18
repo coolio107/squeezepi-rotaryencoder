@@ -577,7 +577,7 @@ void pollPort() {
         struct in_addr addr;
         addr.s_addr = foundAddr;
         char * aAddr = inet_ntoa(addr);
-        printf("Address found: %s", aAddr);
+        printf("Address found: %s\n", aAddr);
         strncpy(foundServer, aAddr, 16);
         server = foundServer;
         port = foundPort;
@@ -649,8 +649,8 @@ int main( int argc, char *argv[] ) {
     printf ("start out\n");
     wiringPiSetup() ;
     //struct encoder *encoder = setupencoder(5, 4);
-    encoder = setupencoder(5, 4, reactEncoderInterrupt, INT_EDGE_BOTH);
-    button = setupbutton(6, buttonPress, INT_EDGE_RISING);
+    encoder = setupencoder(5, 4, reactEncoderInterrupt, INT_EDGE_BOTH); // GPIO 24, 23
+    button = setupbutton(6, buttonPress, INT_EDGE_RISING); // GPIO 25
     
     // button
     //pinMode(6, INPUT);
