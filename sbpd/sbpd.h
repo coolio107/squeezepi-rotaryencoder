@@ -12,6 +12,24 @@
 #define sbpd_h
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <time.h>
+#include <pthread.h>
+#include <curl/curl.h>
+
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/param.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+
 #include <syslog.h>
 
 #define USER_AGENT  "SqueezeButtonPi"
