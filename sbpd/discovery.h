@@ -9,7 +9,6 @@
 #ifndef discovery_h
 #define discovery_h
 
-#include <stdio.h>
 #include "sbpd.h"
 
 //

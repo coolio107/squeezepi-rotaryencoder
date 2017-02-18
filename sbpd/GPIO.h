@@ -9,8 +9,7 @@
 #ifndef GPIO_h
 #define GPIO_h
 
-#include <stdio.h>
-#include <stdbool.h>
+#include "sbpd.h"
 
 
 //

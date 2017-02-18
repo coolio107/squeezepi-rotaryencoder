@@ -9,9 +9,7 @@
 #ifndef servercomm_h
 #define servercomm_h
 
-#include <stdio.h>
 #include "sbpd.h"
-#include <stdbool.h>
 
 //
 //

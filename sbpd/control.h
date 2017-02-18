@@ -9,7 +9,6 @@
 #ifndef control_h
 #define control_h
 
-#include <stdio.h>
 #include "sbpd.h"
 #include "GPIO.h"
 

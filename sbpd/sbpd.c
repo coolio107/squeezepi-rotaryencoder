@@ -11,7 +11,6 @@
 //  Copyright © 2017 PenguinLovesMusic.com. All rights reserved.
 //
 
-#include <stdio.h>
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>

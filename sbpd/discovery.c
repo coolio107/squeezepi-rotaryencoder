@@ -13,11 +13,9 @@
 #include "discovery.h"
 #include "sbpd.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdbool.h>
 #include <ctype.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
