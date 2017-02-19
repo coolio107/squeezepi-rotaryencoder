@@ -142,6 +142,7 @@ bool get_serverIPv4(uint32_t *ip) {
         fclose(procTcp);
         return false;
     }
+    bool found = false;
     while (fgets(line, 255, procTcp)) {
         logdebug("/proc/net/tcp line: %s", line);
         strtok(line, " "); // line number
@@ -171,19 +172,28 @@ bool get_serverIPv4(uint32_t *ip) {
         // port 3483?
         //
         if (*((uint32_t *)portComp) == *((uint32_t *)portString)) {
-            fclose(procTcp);
             foundIp = (uint32_t)strtoul(ipString, NULL, 16);
             if (foundIp != *ip) {
-                *ip = foundIp;
+                if (!found) // only change once. The rest is for logging only
+                    *ip = foundIp;
                 loginfo("Found server %s. A new address", ipString);
-                return true;
+                // no logging: we're done
+                if (loglevel() < LOG_NOTICE) {
+                    fclose(procTcp);
+                    return true;
+                }
+                found = true;
             }
             loginfo("Found server %s. Same as before");
-            return false;
+            // no logging? we're done
+            if (loglevel() < LOG_NOTICE) {
+                fclose(procTcp);
+                return false;
+            }
         }
     }
     fclose(procTcp);
-    return false;
+    return found;
 }
 
 static int udpSocket = 0;
