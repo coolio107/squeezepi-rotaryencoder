@@ -173,7 +173,7 @@ bool get_serverIPv4(uint32_t *ip) {
         }
         char * ipString = strtok(target, ":");
         char * portString = strtok(NULL, ":");
-        char * socketState = strtok(NULL, ":");
+        char * socketState = strtok(NULL, " "); // socket state
         if (!ipString || !portString || !socketState) {
             if (!ipString)
                 logwarn("no ipString found");
