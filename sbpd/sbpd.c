@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <argp.h>
 #include <sys/time.h>
 #include <sys/param.h>
@@ -109,8 +110,41 @@ static char doc[] = "sbpd - SqueezeButtinPiDaemon is a button and rotary encoder
 //  ARGP parsing structure
 //
 static struct argp argp = {options, parse_opt, args_doc, doc};
+static bool arg_daemonize = false;
 
 int main(int argc, char * argv[]) {
+    //
+    //  Init GPIO
+    //
+    init_GPIO();
+    
+    //
+    //  Parse Arguments
+    //
+    argp_parse (&argp, argc, argv, 0, 0, 0);
+    
+    //
+    //  Daemonize
+    //
+    if (arg_daemonize) {
+        int cpid = fork();
+        if( cpid == -1 ) {
+            logerr("Could not fork sbpd");
+            return -1;
+        }
+        if (cpid)   // Parent process exits ...
+            return 0;
+        if( setsid() == -1 ) {
+            logerr("Could not create new session");
+            return -2;
+        }
+        int fd = open( "/dev/null", O_RDWR, 0 );
+        if( fd!=-1) {
+            dup2(fd, STDIN_FILENO);
+            dup2(fd, STDOUT_FILENO);
+            dup2(fd, STDERR_FILENO);
+        }
+    }
     //
     // Configure signal handling
     //
@@ -121,26 +155,6 @@ int main(int argc, char * argv[]) {
     sigaction( SIGINT, &act, NULL );
     sigaction( SIGTERM, &act, NULL );
     
-    //
-    // Configure pid file
-    //
-    FILE            *fp;
-    const char      *pid_fname      = "/var/run/sbpd.pid";
-    fp = fopen( pid_fname, "w" );
-    if( fp ) {
-        fprintf( fp, "%d\n", getpid() );
-        fclose( fp );
-    }
-    
-    //
-    //  Init GPIO
-    //
-    init_GPIO();
-    
-    //
-    //  Parse Arguments
-    //
-    argp_parse (&argp, argc, argv, 0, 0, 0);
     
     //
     // Find MAC
@@ -216,7 +230,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
             break;
             //  Daemonize
         case 'd':
-            loginfo("Options parsing: Daemonize (todo)");
+            loginfo("Options parsing: Daemonize");
+            // don't daemonize here, parse all args first
+            arg_daemonize = true;
             break;
             
             //

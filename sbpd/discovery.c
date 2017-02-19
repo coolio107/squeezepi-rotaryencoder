@@ -125,7 +125,9 @@ void _write_server_string(struct sbpd_server * server, in_addr_t s_addr) {
     server->host = foundServer;
 }
 
-// define to not have to include kernel file
+//
+//  Define TCP states here to not have to include kernel header
+//
 enum {
     TCP_ESTABLISHED = 1,
     TCP_SYN_SENT,
@@ -137,11 +139,10 @@ enum {
     TCP_CLOSE_WAIT,
     TCP_LAST_ACK,
     TCP_LISTEN,
-    TCP_CLOSING,    /* Now a valid state */
+    TCP_CLOSING,    // Now a valid state
     
-    TCP_MAX_STATES  /* Leave at the end! */
+    TCP_MAX_STATES  // Leave at the end!
 };
-
 //
 //
 // Get server IP from /proc/net/tcp
