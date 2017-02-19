@@ -100,6 +100,16 @@ bool send_command(struct sbpd_server * server, char * fragment) {
     return true;
 }
 
+//
+//  Curl reply callback
+//  Replies from the server go here.
+//  We could handle return values here but we just log.
+//
+size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
+    if (size)
+        logdebug("Server rely %s", buffer);
+    return size;
+}
 
 //
 //
@@ -132,6 +142,7 @@ int init_comm(char * use_mac) {
     //
     if (loglevel() == LOG_DEBUG)
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     headerList = curl_slist_append(headerList, "Content-Type: application/json");
     char userAgent[50];
     snprintf(userAgent, sizeof(userAgent), "User-Agent: %s/%s)", USER_AGENT, VERSION);
