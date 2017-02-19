@@ -165,6 +165,7 @@ bool get_serverIPv4(uint32_t *ip) {
         strtok(line, " "); // line number
         strtok(NULL, " "); // source address
         char * target = strtok(NULL, " "); // target address
+        char * socketState = strtok(NULL, " "); // socket state
         logdebug("target: %s\n", target);
         if (!target) {
             logwarn("no tcp target found");
@@ -173,7 +174,6 @@ bool get_serverIPv4(uint32_t *ip) {
         }
         char * ipString = strtok(target, ":");
         char * portString = strtok(NULL, ":");
-        char * socketState = strtok(NULL, " "); // socket state
         if (!ipString || !portString || !socketState) {
             if (!ipString)
                 logwarn("no ipString found");
