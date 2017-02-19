@@ -51,6 +51,7 @@ static int sysloglevel = LOG_ALERT;
 const char *argp_program_version = USER_AGENT " " VERSION;
 const char *argp_program_bug_address = "<coolio@penguinlovesmusic.com>";
 static error_t parse_opt(int key, char *arg, struct argp_state *state);
+static error_t parse_arg();
 //
 //  OPTIONS.  Field 1 in ARGP.
 //  Order of fields: {NAME, KEY, ARG, FLAGS, DOC, GROUP}.
@@ -111,18 +112,15 @@ static char doc[] = "sbpd - SqueezeButtinPiDaemon is a button and rotary encoder
 //
 static struct argp argp = {options, parse_opt, args_doc, doc};
 static bool arg_daemonize = false;
+static char *arg_elements[max_buttons + max_encoders];
+static int arg_element_count = 0;
 
 int main(int argc, char * argv[]) {
-    //
-    //  Init GPIO
-    //
-    init_GPIO();
-    
     //
     //  Parse Arguments
     //
     argp_parse (&argp, argc, argv, 0, 0, 0);
-    
+
     //
     //  Daemonize
     //
@@ -145,6 +143,19 @@ int main(int argc, char * argv[]) {
             dup2(fd, STDERR_FILENO);
         }
     }
+    
+    //
+    //  Init GPIO
+    //  Done after daemonization becasue child process needs to have GPIO initilized
+    //
+    init_GPIO();
+    
+    //
+    //  Now parse GPIO elements
+    //  Needed to initialize GPIO first
+    //
+    parse_arg();
+    
     //
     // Configure signal handling
     //
@@ -273,42 +284,62 @@ parse_opt (int key, char *arg, struct argp_state *state)
             configured_parameters |= SBPD_cfg_password;
             break;
             
-            //
-            //  GPIO devices
-            //
-            //  Arguments are a comma-separated list of configuration parameters:
-            //  For rotary encoders (one, volume only):
-            //      e,pin1,pin2,CMD[,edge]
-            //          "e" for "Encoder"
-            //          p1, p2: GPIO PIN numbers in BCM-notation
-            //          CMD: Command. Unused for encoders, always VOLM for Volume
-            //          edge: Optional. one of
-            //                  1 - falling edge
-            //                  2 - rising edge
-            //                  0, 3 - both
-            //  For buttons:
-            //      b,pin,CMD[,edge]
-            //          "b" for "Button"
-            //          pin: GPIO PIN numbers in BCM-notation
-            //          CMD: Command. One of:
-            //              PLAY:   Play/pause
-            //              PREV:   Jump to previous track
-            //              NEXT:   Jump to next track
-            //              VOL+:   Increase volume
-            //              VOL-:   Decrease volume
-            //              POWR:   Toggle power state
-            //          edge: Optional. one of
-            //                  1 - falling edge
-            //                  2 - rising edge
-            //                  0, 3 - both
-            //
-        case ARGP_KEY_ARG: {
+        case ARGP_KEY_ARG:
+            if (arg_element_count == (max_encoders + max_buttons)) {
+                logerr("Too many control elements defined");
+                return ARGP_ERR_UNKNOWN;
+            }
+            arg_elements[arg_element_count] = arg;
+            arg_element_count++;
+            break;
+        case ARGP_KEY_END:
+            break;
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+//
+//  Parse non-option arguments
+//
+//  GPIO devices
+//
+//  Arguments are a comma-separated list of configuration parameters:
+//  For rotary encoders (one, volume only):
+//      e,pin1,pin2,CMD[,edge]
+//          "e" for "Encoder"
+//          p1, p2: GPIO PIN numbers in BCM-notation
+//          CMD: Command. Unused for encoders, always VOLM for Volume
+//          edge: Optional. one of
+//                  1 - falling edge
+//                  2 - rising edge
+//                  0, 3 - both
+//  For buttons:
+//      b,pin,CMD[,edge]
+//          "b" for "Button"
+//          pin: GPIO PIN numbers in BCM-notation
+//          CMD: Command. One of:
+//              PLAY:   Play/pause
+//              PREV:   Jump to previous track
+//              NEXT:   Jump to next track
+//              VOL+:   Increase volume
+//              VOL-:   Decrease volume
+//              POWR:   Toggle power state
+//          edge: Optional. one of
+//                  1 - falling edge
+//                  2 - rising edge
+//                  0, 3 - both
+//
+//
+static error_t parse_arg() {
+    for (int arg_num = 0; arg_num < arg_element_count; arg_num++) {
+        char * arg = arg_elements[arg_num];
+        {
             char * code = strtok(arg, ",");
             if (strlen(code) != 1)
                 return ARGP_ERR_UNKNOWN;
             switch (code[0]) {
                 case 'e': {
-                    loginfo("Options parsing: configure rotary encoder");
                     char * string = strtok(NULL, ",");
                     int p1 = 0;
                     if (string)
@@ -343,11 +374,6 @@ parse_opt (int key, char *arg, struct argp_state *state)
                     break;
             }
         }
-            break;
-        case ARGP_KEY_END:
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
     }
     return 0;
 }
