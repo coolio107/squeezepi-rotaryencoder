@@ -75,7 +75,7 @@ void poll_discovery(sbpd_config_parameters_t config,
             if (server->host)
                 addr = inet_addr(server->host);
             bool change = get_serverIPv4(&addr);
-            logdebug("Server address %s", (change) ? "found" : "not found");
+            logdebug("New or changed server address %s", (change) ? "found" : "not found");
             if (change) {
                 //
                 // found server but not port

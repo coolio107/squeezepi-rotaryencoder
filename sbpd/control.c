@@ -121,6 +121,7 @@ void handle_buttons(struct sbpd_server * server) {
         if (button_ctrls[cnt].waiting) {
             loginfo("Button pressed: Pin %d", button_ctrls[cnt].gpio_button->pin);
             send_command(server, button_ctrls[cnt].fragment);
+            button_ctrls[cnt].waiting = false;  // clear waiting
         }
     }
 }
