@@ -105,10 +105,10 @@ bool send_command(struct sbpd_server * server, char * fragment) {
 //  Replies from the server go here.
 //  We could handle return values here but we just log.
 //
-size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
+size_t write_data(char *buffer, size_t size, size_t nmemb, void *userp) {
     if (size)
-        logdebug("Server rely %s", buffer);
-    return size;
+        logdebug("Server reply %s", buffer);
+    return size * nmemb;
 }
 
 //
