@@ -125,6 +125,23 @@ void _write_server_string(struct sbpd_server * server, in_addr_t s_addr) {
     server->host = foundServer;
 }
 
+// define to not have to include kernel file
+enum {
+    TCP_ESTABLISHED = 1,
+    TCP_SYN_SENT,
+    TCP_SYN_RECV,
+    TCP_FIN_WAIT1,
+    TCP_FIN_WAIT2,
+    TCP_TIME_WAIT,
+    TCP_CLOSE,
+    TCP_CLOSE_WAIT,
+    TCP_LAST_ACK,
+    TCP_LISTEN,
+    TCP_CLOSING,    /* Now a valid state */
+    
+    TCP_MAX_STATES  /* Leave at the end! */
+};
+
 //
 //
 // Get server IP from /proc/net/tcp
@@ -156,8 +173,14 @@ bool get_serverIPv4(uint32_t *ip) {
         }
         char * ipString = strtok(target, ":");
         char * portString = strtok(NULL, ":");
-        if (!ipString || !portString) {
-            logwarn((portString) ? "no ipString found" : "no portString found");
+        char * socketState = strtok(NULL, ":");
+        if (!ipString || !portString || !socketState) {
+            if (!ipString)
+                logwarn("no ipString found");
+            if (!portString)
+                logwarn("no portString found");
+            if (!socketState)
+                logwarn("no socketState found");
             fclose(procTcp);
             return false;
         }
@@ -169,9 +192,14 @@ bool get_serverIPv4(uint32_t *ip) {
         while ((*sTemp = toupper(*sTemp)))
             sTemp++;
         //
-        // port 3483?
+        //  state
         //
-        if (*((uint32_t *)portComp) == *((uint32_t *)portString)) {
+        unsigned long uSocketState = strtol(socketState, NULL, 16);
+        //
+        // port 3483 and socket state == TCP_ESTABLISHED?
+        //
+        if ((*((uint32_t *)portComp) == *((uint32_t *)portString)) &&
+            (uSocketState == TCP_ESTABLISHED)) {
             foundIp = (uint32_t)strtoul(ipString, NULL, 16);
             if (foundIp != *ip) {
                 if (!found) // only change once. The rest is for logging only
